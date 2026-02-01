@@ -2,19 +2,24 @@ import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
+import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
+import { useSearchNews } from "@/hooks/useNews";
 import { searchNews } from "@/data/newsData";
-import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const [results, setResults] = useState(searchNews(query));
-
-  useEffect(() => {
-    setResults(searchNews(query));
-  }, [query]);
+  
+  const { data: dbResults = [], isLoading } = useSearchNews(query);
+  
+  // Fallback to mock data search
+  const mockResults = searchNews(query);
+  const hasDbResults = dbResults.length > 0;
+  const results = hasDbResults ? dbResults : mockResults;
 
   return (
     <Layout>
@@ -52,7 +57,13 @@ const SearchPage = () => {
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Results */}
           <div className="lg:col-span-2">
-            {results.length > 0 ? (
+            {isLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-[300px] w-full rounded-lg" />
+                ))}
+              </div>
+            ) : results.length > 0 ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {results.map((article, index) => (
                   <motion.div
@@ -61,7 +72,11 @@ const SearchPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <NewsCard article={article} />
+                    {hasDbResults ? (
+                      <NewsCardDb article={article as any} />
+                    ) : (
+                      <NewsCard article={article as any} />
+                    )}
                   </motion.div>
                 ))}
               </div>
@@ -86,7 +101,7 @@ const SearchPage = () => {
 
           {/* Sidebar */}
           <div className="hidden lg:block">
-            <Sidebar />
+            {hasDbResults ? <SidebarDb /> : <Sidebar />}
           </div>
         </div>
       </div>

@@ -2,14 +2,65 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Eye, Share2, Calendar, User } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
+import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
-import { mockNews, categoryLabels, categoryColors } from "@/data/newsData";
+import { useNewsById, useRelatedNews } from "@/hooks/useNews";
+import { mockNews, categoryLabels, categoryColors, SportCategory } from "@/data/newsData";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ArticlePage = () => {
   const { id } = useParams();
-  const article = mockNews.find((n) => n.id === id);
+  const { data: dbArticle, isLoading } = useNewsById(id || "");
+  
+  // Fallback to mock data if not in database
+  const mockArticle = mockNews.find((n) => n.id === id);
+  const article = dbArticle || (mockArticle ? {
+    ...mockArticle,
+    published_at: mockArticle.date,
+    is_hot: mockArticle.isHot || false,
+    is_live: mockArticle.isLive || false,
+    source_url: null,
+  } : null);
+
+  const { data: relatedNews = [] } = useRelatedNews(
+    article?.category as SportCategory,
+    id || "",
+    3
+  );
+
+  // Fallback related news from mock
+  const mockRelated = mockNews
+    .filter((n) => n.category === article?.category && n.id !== id)
+    .slice(0, 3);
+  
+  const displayRelated = relatedNews.length > 0 ? relatedNews : mockRelated;
+  const hasDbNews = !!dbArticle;
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-[400px] w-full rounded-lg" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+            <div className="hidden lg:block">
+              <Skeleton className="h-64 w-full rounded-lg" />
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   if (!article) {
     return (
@@ -24,9 +75,13 @@ const ArticlePage = () => {
     );
   }
 
-  const relatedNews = mockNews
-    .filter((n) => n.category === article.category && n.id !== article.id)
-    .slice(0, 3);
+  const formattedDate = format(
+    new Date(article.published_at),
+    "d MMMM yyyy",
+    { locale: ru }
+  );
+  const readTime = Math.max(1, Math.ceil(article.content.length / 1500));
+  const category = article.category as SportCategory;
 
   return (
     <Layout>
@@ -39,10 +94,10 @@ const ArticlePage = () => {
             </Link>
             <span>/</span>
             <Link
-              to={`/category/${article.category}`}
+              to={`/category/${category}`}
               className="transition-colors hover:text-foreground"
             >
-              {categoryLabels[article.category]}
+              {categoryLabels[category]}
             </Link>
             <span>/</span>
             <span className="line-clamp-1 text-foreground">{article.title}</span>
@@ -68,8 +123,8 @@ const ArticlePage = () => {
 
             {/* Category Badge */}
             <div className="mb-4">
-              <span className={cn("category-badge text-primary-foreground", categoryColors[article.category])}>
-                {categoryLabels[article.category]}
+              <span className={cn("category-badge text-primary-foreground", categoryColors[category])}>
+                {categoryLabels[category]}
               </span>
             </div>
 
@@ -86,11 +141,11 @@ const ArticlePage = () => {
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {article.date}
+                {formattedDate}
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {article.readTime} мин чтения
+                {readTime} мин чтения
               </span>
               <span className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
@@ -105,7 +160,7 @@ const ArticlePage = () => {
             {/* Featured Image */}
             <div className="mb-8 overflow-hidden rounded-lg">
               <img
-                src={article.image}
+                src={article.image || "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=800"}
                 alt={article.title}
                 className="h-auto w-full object-cover"
               />
@@ -118,47 +173,46 @@ const ArticlePage = () => {
 
             {/* Content */}
             <div className="prose prose-invert max-w-none">
-              <p className="mb-6 text-muted-foreground leading-relaxed">
-                {article.content}
-              </p>
-              <p className="mb-6 text-muted-foreground leading-relaxed">
-                Матч привлёк огромное внимание болельщиков по всему миру. Стадион был заполнен до отказа, а телевизионная аудитория превысила 500 миллионов человек. Это событие стало одним из самых ярких моментов сезона.
-              </p>
-              <p className="mb-6 text-muted-foreground leading-relaxed">
-                Эксперты отмечают высокий уровень игры обеих команд, однако разница в классе оказалась очевидной. Победители продемонстрировали тактическую гибкость и превосходную физическую подготовку.
-              </p>
-              <p className="text-muted-foreground leading-relaxed">
-                Следующий матч состоится через неделю, и болельщики с нетерпением ждут продолжения захватывающего сезона.
-              </p>
+              {article.content.split('\n\n').map((paragraph, index) => (
+                <p key={index} className="mb-6 text-muted-foreground leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
             </div>
 
             {/* Tags */}
-            <div className="mt-8 border-t border-border pt-6">
-              <h4 className="mb-3 font-display text-sm font-bold uppercase text-muted-foreground">
-                Теги:
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {article.tags.map((tag) => (
-                  <Link
-                    key={tag}
-                    to={`/search?q=${encodeURIComponent(tag)}`}
-                    className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                  >
-                    #{tag}
-                  </Link>
-                ))}
+            {article.tags && article.tags.length > 0 && (
+              <div className="mt-8 border-t border-border pt-6">
+                <h4 className="mb-3 font-display text-sm font-bold uppercase text-muted-foreground">
+                  Теги:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      to={`/search?q=${encodeURIComponent(tag)}`}
+                      className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+                    >
+                      #{tag}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Related News */}
-            {relatedNews.length > 0 && (
+            {displayRelated.length > 0 && (
               <div className="mt-12">
                 <h3 className="mb-6 font-display text-2xl font-bold uppercase text-foreground">
                   Похожие новости
                 </h3>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {relatedNews.map((news) => (
-                    <NewsCard key={news.id} article={news} />
+                  {displayRelated.map((news: any) => (
+                    hasDbNews ? (
+                      <NewsCardDb key={news.id} article={news} />
+                    ) : (
+                      <NewsCard key={news.id} article={news} />
+                    )
                   ))}
                 </div>
               </div>
@@ -167,7 +221,7 @@ const ArticlePage = () => {
 
           {/* Sidebar */}
           <div className="hidden lg:block">
-            <Sidebar />
+            {hasDbNews ? <SidebarDb /> : <Sidebar />}
           </div>
         </div>
       </div>

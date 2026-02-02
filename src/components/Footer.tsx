@@ -91,9 +91,9 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                <a href="https://t.me/ivan_nogdanov" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                   Контакты
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

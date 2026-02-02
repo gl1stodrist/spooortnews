@@ -46,9 +46,9 @@ export const Header = () => {
             <Link to="/" className="text-muted-foreground transition-colors hover:text-foreground">
               О нас
             </Link>
-            <Link to="/" className="text-muted-foreground transition-colors hover:text-foreground">
+            <a href="https://t.me/ivan_nogdanov" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">
               Контакты
-            </Link>
+            </a>
           </div>
         </div>
       </div>

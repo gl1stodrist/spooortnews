@@ -76,7 +76,7 @@ export const Footer = () => {
             </h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                   О проекте
                 </Link>
               </li>

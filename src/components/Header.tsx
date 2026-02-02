@@ -43,7 +43,7 @@ export const Header = () => {
             </span>
           </div>
           <div className="flex items-center gap-4 text-xs">
-            <Link to="/" className="text-muted-foreground transition-colors hover:text-foreground">
+            <Link to="/about" className="text-muted-foreground transition-colors hover:text-foreground">
               О нас
             </Link>
             <a href="https://t.me/ivan_nogdanov" target="_blank" rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-foreground">

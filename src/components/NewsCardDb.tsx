@@ -13,8 +13,12 @@ interface NewsCardDbProps {
 }
 
 export const NewsCardDb = ({ article, variant = "default" }: NewsCardDbProps) => {
-  const formattedDate = format(new Date(article.published_at), "d MMMM yyyy", { locale: ru });
-  const readTime = Math.max(1, Math.ceil(article.content.length / 1500));
+  const publishedDate = new Date(article.published_at);
+  const isValidDate = !isNaN(publishedDate.getTime());
+  const formattedDate = isValidDate 
+    ? format(publishedDate, "d MMMM yyyy", { locale: ru })
+    : "Дата неизвестна";
+  const readTime = Math.max(1, Math.ceil((article.content?.length || 0) / 1500));
   const category = article.category as SportCategory;
 
   if (variant === "featured") {

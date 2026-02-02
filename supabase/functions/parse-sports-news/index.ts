@@ -140,6 +140,7 @@ Deno.serve(async (req) => {
 3. Напиши полный текст статьи (3-5 абзацев, профессиональный журналистский стиль)
 4. Определи 3-5 тегов
 5. Определи, является ли новость "горячей" (важная/срочная)
+6. Напиши короткий промпт для генерации изображения (на английском, 10-20 слов, описание спортивной сцены без текста и логотипов)
 
 Верни JSON в формате:
 {
@@ -147,7 +148,8 @@ Deno.serve(async (req) => {
   "excerpt": "краткий лид",
   "content": "полный текст статьи",
   "tags": ["тег1", "тег2"],
-  "is_hot": true/false
+  "is_hot": true/false,
+  "image_prompt": "English prompt for image generation"
 }`,
               },
               {
@@ -173,11 +175,47 @@ Deno.serve(async (req) => {
             const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
             if (jsonMatch) {
               const parsed = JSON.parse(jsonMatch[0]);
+              
+              // Generate image using AI
+              let generatedImageUrl = article.image;
+              
+              if (parsed.image_prompt) {
+                try {
+                  console.log(`Generating image for: ${parsed.title}`);
+                  
+                  const imageResponse = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      model: 'google/gemini-3-pro-image-preview',
+                      prompt: `Professional sports photography, high quality, dynamic action shot: ${parsed.image_prompt}. Ultra high resolution, cinematic lighting, 16:9 aspect ratio.`,
+                      n: 1,
+                      size: '1024x576',
+                    }),
+                  });
+
+                  if (imageResponse.ok) {
+                    const imageData = await imageResponse.json();
+                    if (imageData.data?.[0]?.url) {
+                      generatedImageUrl = imageData.data[0].url;
+                      console.log(`Image generated successfully for: ${parsed.title}`);
+                    }
+                  } else {
+                    console.error('Image generation failed:', await imageResponse.text());
+                  }
+                } catch (imgError) {
+                  console.error('Image generation error:', imgError);
+                }
+              }
+              
               processedArticles.push({
                 title: parsed.title || article.title,
                 excerpt: parsed.excerpt || article.excerpt,
                 content: parsed.content || article.content,
-                image: article.image,
+                image: generatedImageUrl || getDefaultImage(article.category),
                 category: article.category,
                 source_url: article.sourceUrl,
                 tags: parsed.tags || article.tags,

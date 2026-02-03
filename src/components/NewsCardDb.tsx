@@ -4,7 +4,7 @@ import { Clock, Eye, Flame } from "lucide-react";
 import { NewsArticle } from "@/hooks/useNews";
 import { categoryLabels, categoryColors, SportCategory } from "@/data/newsData";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { ru } from "date-fns/locale";
 
 interface NewsCardDbProps {
@@ -12,12 +12,42 @@ interface NewsCardDbProps {
   variant?: "default" | "featured" | "compact";
 }
 
+const formatPublishedDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Дата неизвестна";
+  
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  
+  // Less than 1 hour ago
+  if (diffHours < 1) {
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    if (diffMinutes < 1) return "Только что";
+    return `${diffMinutes} мин. назад`;
+  }
+  
+  // Less than 24 hours ago
+  if (diffHours < 24) {
+    return formatDistanceToNow(date, { addSuffix: true, locale: ru });
+  }
+  
+  // Yesterday
+  if (isYesterday(date)) {
+    return `Вчера в ${format(date, "HH:mm", { locale: ru })}`;
+  }
+  
+  // Today (edge case)
+  if (isToday(date)) {
+    return `Сегодня в ${format(date, "HH:mm", { locale: ru })}`;
+  }
+  
+  // Older than yesterday
+  return format(date, "d MMMM yyyy", { locale: ru });
+};
+
 export const NewsCardDb = ({ article, variant = "default" }: NewsCardDbProps) => {
-  const publishedDate = new Date(article.published_at);
-  const isValidDate = !isNaN(publishedDate.getTime());
-  const formattedDate = isValidDate 
-    ? format(publishedDate, "d MMMM yyyy", { locale: ru })
-    : "Дата неизвестна";
+  const formattedDate = formatPublishedDate(article.published_at);
   const readTime = Math.max(1, Math.ceil((article.content?.length || 0) / 1500));
   const category = article.category as SportCategory;
 

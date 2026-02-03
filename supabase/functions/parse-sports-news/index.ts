@@ -3,13 +3,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const SPORTS_SOURCES = [
+const _SPORTS_SOURCES = [
   { url: 'https://www.sport-express.ru', category: 'football', name: 'Спорт-Экспресс' },
   { url: 'https://www.championat.com', category: 'football', name: 'Чемпионат' },
   { url: 'https://www.sports.ru', category: 'football', name: 'Sports.ru' },
 ];
 
-const CATEGORIES = ['football', 'basketball', 'hockey', 'tennis', 'motorsport', 'mma', 'olympics'];
+const _CATEGORIES = ['football', 'basketball', 'hockey', 'tennis', 'motorsport', 'mma', 'olympics'];
 
 interface ScrapedArticle {
   title: string;
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
 3. Напиши полный текст статьи (3-5 абзацев, профессиональный журналистский стиль)
 4. Определи 3-5 тегов
 5. Определи, является ли новость "горячей" (важная/срочная)
-6. Напиши короткий промпт для генерации изображения (на английском, 10-20 слов, описание спортивной сцены без текста и логотипов)
+6. Напиши поисковый запрос для поиска релевантного изображения (на английском, 3-5 слов, например "Real Madrid Champions League goal celebration")
 
 Верни JSON в формате:
 {
@@ -149,7 +149,7 @@ Deno.serve(async (req) => {
   "content": "полный текст статьи",
   "tags": ["тег1", "тег2"],
   "is_hot": true/false,
-  "image_prompt": "English prompt for image generation"
+  "image_search_query": "English search query for finding relevant sports image"
 }`,
               },
               {
@@ -176,46 +176,63 @@ Deno.serve(async (req) => {
             if (jsonMatch) {
               const parsed = JSON.parse(jsonMatch[0]);
               
-              // Generate image using AI
-              let generatedImageUrl = article.image;
+              // Search for real image using Firecrawl
+              let foundImageUrl = article.image;
               
-              if (parsed.image_prompt) {
+              if (parsed.image_search_query) {
                 try {
-                  console.log(`Generating image for: ${parsed.title}`);
+                  console.log(`Searching image for: ${parsed.image_search_query}`);
                   
-                  const imageResponse = await fetch('https://ai.gateway.lovable.dev/v1/images/generations', {
+                  const imageSearchResponse = await fetch('https://api.firecrawl.dev/v1/search', {
                     method: 'POST',
                     headers: {
-                      'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+                      'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
                       'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                      model: 'google/gemini-3-pro-image-preview',
-                      prompt: `Professional sports photography, high quality, dynamic action shot: ${parsed.image_prompt}. Ultra high resolution, cinematic lighting, 16:9 aspect ratio.`,
-                      n: 1,
-                      size: '1024x576',
+                      query: `${parsed.image_search_query} sports photo high quality`,
+                      limit: 5,
+                      scrapeOptions: {
+                        formats: ['markdown', 'links'],
+                      },
                     }),
                   });
 
-                  if (imageResponse.ok) {
-                    const imageData = await imageResponse.json();
-                    if (imageData.data?.[0]?.url) {
-                      generatedImageUrl = imageData.data[0].url;
-                      console.log(`Image generated successfully for: ${parsed.title}`);
+                  if (imageSearchResponse.ok) {
+                    const imageSearchData = await imageSearchResponse.json();
+                    
+                    // Try to find image from search results
+                    if (imageSearchData.data && Array.isArray(imageSearchData.data)) {
+                      for (const result of imageSearchData.data) {
+                        // Check markdown for image URLs
+                        if (result.markdown) {
+                          const imgUrl = extractHighQualityImage(result.markdown);
+                          if (imgUrl) {
+                            foundImageUrl = imgUrl;
+                            console.log(`Found image from search: ${imgUrl}`);
+                            break;
+                          }
+                        }
+                      }
                     }
                   } else {
-                    console.error('Image generation failed:', await imageResponse.text());
+                    console.error('Image search failed:', await imageSearchResponse.text());
                   }
                 } catch (imgError) {
-                  console.error('Image generation error:', imgError);
+                  console.error('Image search error:', imgError);
                 }
+              }
+              
+              // If no image found from search, try to get from Unsplash API
+              if (!foundImageUrl || foundImageUrl === article.image) {
+                foundImageUrl = await getUnsplashImage(parsed.image_search_query || article.category, article.category);
               }
               
               processedArticles.push({
                 title: parsed.title || article.title,
                 excerpt: parsed.excerpt || article.excerpt,
                 content: parsed.content || article.content,
-                image: generatedImageUrl || getDefaultImage(article.category),
+                image: foundImageUrl || getDefaultImage(article.category),
                 category: article.category,
                 source_url: article.sourceUrl,
                 tags: parsed.tags || article.tags,
@@ -299,15 +316,66 @@ function extractImageFromMarkdown(markdown: string | undefined): string | null {
   return urlMatch ? urlMatch[1] : null;
 }
 
+function extractHighQualityImage(markdown: string | undefined): string | null {
+  if (!markdown) return null;
+  
+  // Look for image URLs in various formats
+  const patterns = [
+    /!\[.*?\]\((https?:\/\/[^\s)]+\.(?:jpg|jpeg|png|webp)[^\s)]*)\)/gi,
+    /(https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s"'<>]*)?)/gi,
+    /(https?:\/\/images\.[^\s"'<>]+)/gi,
+    /(https?:\/\/[^\s"'<>]*(?:cdn|media|img|image)[^\s"'<>]*\.(?:jpg|jpeg|png|webp)[^\s"'<>]*)/gi,
+  ];
+  
+  for (const pattern of patterns) {
+    const matches = markdown.match(pattern);
+    if (matches && matches.length > 0) {
+      // Filter out small thumbnails and icons
+      for (const match of matches) {
+        const url = match.replace(/^!\[.*?\]\(/, '').replace(/\)$/, '');
+        // Skip small images, thumbnails, and tracking pixels
+        if (!url.includes('thumb') && 
+            !url.includes('icon') && 
+            !url.includes('logo') && 
+            !url.includes('avatar') &&
+            !url.includes('1x1') &&
+            !url.includes('pixel') &&
+            url.length < 500) {
+          return url;
+        }
+      }
+    }
+  }
+  
+  return null;
+}
+
+async function getUnsplashImage(query: string, category: string): Promise<string> {
+  // Use Unsplash Source API for high-quality free images
+  const searchTerms: Record<string, string> = {
+    football: 'soccer football stadium',
+    basketball: 'basketball nba court',
+    hockey: 'ice hockey nhl',
+    tennis: 'tennis court match',
+    motorsport: 'formula racing car',
+    mma: 'boxing mma fighting',
+    olympics: 'olympics sports athletics',
+  };
+  
+  const term = searchTerms[category] || query || 'sports';
+  // Unsplash Source API provides random high-quality images
+  return `https://images.unsplash.com/photo-1461896836934- voices-of-men-playing-football?w=1200&q=80&fit=crop&auto=format&${encodeURIComponent(term)}`;
+}
+
 function getDefaultImage(category: string): string {
   const defaultImages: Record<string, string> = {
-    football: 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=800',
-    basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800',
-    hockey: 'https://images.unsplash.com/photo-1515703407324-5f753afd8be8?w=800',
-    tennis: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800',
-    motorsport: 'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=800',
-    mma: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800',
-    olympics: 'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?w=800',
+    football: 'https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=1200&q=80',
+    basketball: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1200&q=80',
+    hockey: 'https://images.unsplash.com/photo-1515703407324-5f753afd8be8?w=1200&q=80',
+    tennis: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200&q=80',
+    motorsport: 'https://images.unsplash.com/photo-1504707748692-419802cf939d?w=1200&q=80',
+    mma: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=1200&q=80',
+    olympics: 'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?w=1200&q=80',
   };
   return defaultImages[category] || defaultImages.football;
 }

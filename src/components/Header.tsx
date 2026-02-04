@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, X, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,7 +37,7 @@ export const Header = () => {
       <div className="border-b border-border bg-secondary/50">
         <div className="container flex h-8 items-center justify-between">
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span>31 января 2026</span>
+            <span>{format(new Date(), "d MMMM yyyy", { locale: ru })}</span>
             <span className="hidden sm:inline">|</span>
             <span className="hidden items-center gap-1 sm:flex">
               <TrendingUp className="h-3 w-3 text-primary" />

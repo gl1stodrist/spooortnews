@@ -1,6 +1,8 @@
 import { TrendingUp, Flame } from "lucide-react";
 import { getPopularNews, getHotNews } from "@/data/newsData";
 import { NewsCard } from "./NewsCard";
+import winlineBanner1 from "@/assets/winline-banner-1.png";
+import winlineBanner2 from "@/assets/winline-banner-2.png";
 
 export const Sidebar = () => {
   const popularNews = getPopularNews();
@@ -12,7 +14,7 @@ export const Sidebar = () => {
     <aside className="space-y-8">
       {/* Ad Space */}
       <a href={adLink} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
-        <img src="/assets/winline-banner-2.png" alt="Winline - Фрибет 3000" className="w-full" />
+        <img src={winlineBanner2} alt="Winline - Фрибет 3000" className="w-full" />
       </a>
 
       {/* Hot News */}
@@ -48,7 +50,7 @@ export const Sidebar = () => {
 
       {/* Another Ad Space */}
       <a href={adLink} target="_blank" rel="noopener noreferrer" className="sticky top-24 block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
-        <img src="/assets/winline-banner-1.png" alt="Winline - Верни азарт в футбол" className="w-full" />
+        <img src={winlineBanner1} alt="Winline - Верни азарт в футбол" className="w-full" />
       </a>
     </aside>
   );

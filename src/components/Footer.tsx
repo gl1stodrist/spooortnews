@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { categoryLabels, SportCategory } from "@/data/newsData";
+import winlineBanner1 from "@/assets/winline-banner-1.png";
 
 const categories: SportCategory[] = [
   "football",
@@ -124,7 +125,7 @@ export const Footer = () => {
             rel="noopener noreferrer" 
             className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.01]"
           >
-            <img src="/assets/winline-banner-1.png" alt="Winline - Верни азарт в футбол" className="w-full" />
+            <img src={winlineBanner1} alt="Winline - Верни азарт в футбол" className="w-full" />
           </a>
         </div>
       </div>

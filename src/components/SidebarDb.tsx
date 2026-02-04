@@ -7,12 +7,14 @@ export const SidebarDb = () => {
   const { data: popularNews = [], isLoading: loadingPopular } = usePopularNews(5);
   const { data: hotNews = [], isLoading: loadingHot } = useHotNews(3);
 
+  const adLink = "https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg";
+
   return (
     <aside className="space-y-8">
       {/* Ad Space */}
-      <div className="flex h-64 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
-        Рекламный блок 300x250
-      </div>
+      <a href={adLink} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
+        <img src="/assets/winline-banner-2.png" alt="Winline - Фрибет 3000" className="w-full" />
+      </a>
 
       {/* Hot News */}
       <div className="rounded-lg bg-card p-4">
@@ -79,9 +81,9 @@ export const SidebarDb = () => {
       </div>
 
       {/* Another Ad Space */}
-      <div className="sticky top-24 flex h-[600px] items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-sm text-muted-foreground">
-        Рекламный блок 300x600
-      </div>
+      <a href={adLink} target="_blank" rel="noopener noreferrer" className="sticky top-24 block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
+        <img src="/assets/winline-banner-1.png" alt="Winline - Верни азарт в футбол" className="w-full" />
+      </a>
     </aside>
   );
 };

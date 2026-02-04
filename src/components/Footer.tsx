@@ -115,12 +115,17 @@ export const Footer = () => {
         </div>
       </div>
 
-      {/* Ad Space Placeholder */}
+      {/* Ad Space */}
       <div className="border-t border-border bg-muted/30 py-4">
         <div className="container">
-          <div className="flex h-20 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
-            Рекламное место
-          </div>
+          <a 
+            href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.01]"
+          >
+            <img src="/assets/winline-banner-1.png" alt="Winline - Верни азарт в футбол" className="w-full" />
+          </a>
         </div>
       </div>
     </footer>

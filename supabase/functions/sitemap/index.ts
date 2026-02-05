@@ -6,7 +6,7 @@ const corsHeaders = {
   'Content-Type': 'application/xml',
 };
 
-const SITE_URL = "https://spooortnews.lovable.app";
+const SITE_URL = "https://spooort.ru";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {

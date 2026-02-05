@@ -253,26 +253,81 @@ Deno.serve(async (req) => {
 
     console.log(`Processed ${processedArticles.length} articles with AI`);
 
-    // Step 3: Save to database
+    // Step 3: Check for duplicates and save to database
     if (processedArticles.length > 0) {
-      const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/news`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-          'apikey': SUPABASE_SERVICE_ROLE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal',
-        },
-        body: JSON.stringify(processedArticles),
-      });
+      // Fetch existing article titles to check for duplicates
+      const existingTitlesResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/news?select=title,source_url&order=created_at.desc&limit=100`,
+        {
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+          },
+        }
+      );
 
-      if (!insertResponse.ok) {
-        const errorText = await insertResponse.text();
-        console.error('Database insert failed:', errorText);
-        throw new Error(`Database insert failed: ${errorText}`);
+      let existingTitles: Set<string> = new Set();
+      let existingSourceUrls: Set<string> = new Set();
+      
+      if (existingTitlesResponse.ok) {
+        const existingArticles = await existingTitlesResponse.json();
+        existingTitles = new Set(existingArticles.map((a: { title: string }) => a.title.toLowerCase().trim()));
+        existingSourceUrls = new Set(
+          existingArticles
+            .filter((a: { source_url: string | null }) => a.source_url)
+            .map((a: { source_url: string }) => a.source_url)
+        );
       }
 
-      console.log(`Successfully inserted ${processedArticles.length} articles`);
+      // Filter out duplicates by title similarity and source URL
+      const uniqueArticles = processedArticles.filter(article => {
+        const titleLower = article.title.toLowerCase().trim();
+        
+        // Check exact title match
+        if (existingTitles.has(titleLower)) {
+          console.log(`Skipping duplicate (exact title): ${article.title}`);
+          return false;
+        }
+        
+        // Check source URL match
+        if (article.source_url && existingSourceUrls.has(article.source_url)) {
+          console.log(`Skipping duplicate (same source URL): ${article.title}`);
+          return false;
+        }
+        
+        // Check title similarity (at least 80% similar)
+        for (const existingTitle of existingTitles) {
+          if (calculateSimilarity(titleLower, existingTitle) > 0.8) {
+            console.log(`Skipping duplicate (similar title): ${article.title}`);
+            return false;
+          }
+        }
+        
+        return true;
+      });
+
+      console.log(`Filtered to ${uniqueArticles.length} unique articles (removed ${processedArticles.length - uniqueArticles.length} duplicates)`);
+
+      if (uniqueArticles.length > 0) {
+        const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/news`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify(uniqueArticles),
+        });
+
+        if (!insertResponse.ok) {
+          const errorText = await insertResponse.text();
+          console.error('Database insert failed:', errorText);
+          throw new Error(`Database insert failed: ${errorText}`);
+        }
+
+        console.log(`Successfully inserted ${uniqueArticles.length} unique articles`);
+      }
     }
 
     return new Response(
@@ -398,4 +453,32 @@ function extractTags(title: string, description: string | undefined): string[] {
   }
   
   return tags.slice(0, 5);
+}
+
+// Calculate similarity between two strings using Levenshtein distance
+function calculateSimilarity(str1: string, str2: string): number {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  
+  if (longer.length === 0) return 1.0;
+  
+  const costs: number[] = [];
+  for (let i = 0; i <= shorter.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= longer.length; j++) {
+      if (i === 0) {
+        costs[j] = j;
+      } else if (j > 0) {
+        let newValue = costs[j - 1];
+        if (shorter.charAt(i - 1) !== longer.charAt(j - 1)) {
+          newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        }
+        costs[j - 1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if (i > 0) costs[longer.length] = lastValue;
+  }
+  
+  return (longer.length - costs[longer.length]) / longer.length;
 }

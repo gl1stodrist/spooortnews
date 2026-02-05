@@ -11,7 +11,7 @@ interface SEOProps {
   tags?: string[];
 }
 
-const SITE_URL = "https://spooortnews.lovable.app";
+const SITE_URL = "https://spooort.ru";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
 export const SEO = ({

@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Eye, Share2, Calendar, User } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { SEO } from "@/components/SEO";
 import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCardDb } from "@/components/NewsCardDb";
@@ -85,6 +86,16 @@ const ArticlePage = () => {
 
   return (
     <Layout>
+      <SEO
+        title={article.title}
+        description={article.excerpt}
+        image={article.image || undefined}
+        url={`/article/${id}`}
+        type="article"
+        publishedTime={article.published_at}
+        author={article.author}
+        tags={article.tags || []}
+      />
       {/* Breadcrumbs */}
       <div className="border-b border-border bg-secondary/20 py-3">
         <div className="container">

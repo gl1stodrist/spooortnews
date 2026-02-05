@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
+import { SEO } from "@/components/SEO";
 import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
 import { SidebarDb } from "@/components/SidebarDb";
@@ -61,8 +62,22 @@ const Index = () => {
     }
   };
 
+  // SEO data from featured news
+  const seoTitle = !isLoading && featuredNews ? featuredNews.title : "Главные спортивные новости";
+  const seoDescription = !isLoading && featuredNews 
+    ? featuredNews.excerpt 
+    : "Оперативное освещение спортивных новостей со всего мира. Футбол, баскетбол, хоккей, теннис, автоспорт, единоборства.";
+  const seoImage = !isLoading && featuredNews ? featuredNews.image : undefined;
+
   return (
     <Layout>
+      <SEO
+        title={seoTitle}
+        description={seoDescription}
+        image={seoImage || undefined}
+        url="/"
+        type="website"
+      />
       {/* Hero Section */}
       <section className="border-b border-border bg-secondary/20 py-6">
         <div className="container">

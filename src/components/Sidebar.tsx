@@ -1,20 +1,31 @@
 import { TrendingUp, Flame } from "lucide-react";
-import { getPopularNews, getHotNews } from "@/data/newsData";
+import { usePopularNews, useHotNews } from "@/hooks/useNews";
 import { NewsCard } from "./NewsCard";
+import { NewsCardSkeleton } from "./NewsCardSkeleton";
 import winlineBanner1 from "@/assets/winline-banner-1.png";
 import winlineBanner2 from "@/assets/winline-banner-2.png";
 
-export const Sidebar = () => {
-  const popularNews = getPopularNews();
-  const hotNews = getHotNews();
+const AD_LINK = "https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg";
 
-  const adLink = "https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg";
+export const Sidebar = () => {
+  const { data: popularNews = [], isLoading: loadingPopular } =
+    usePopularNews(5);
+  const { data: hotNews = [], isLoading: loadingHot } = useHotNews(3);
 
   return (
     <aside className="space-y-8">
       {/* Ad Space */}
-      <a href={adLink} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
-        <img src={winlineBanner2} alt="Winline - Фрибет 3000" className="w-full" />
+      <a
+        href={AD_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]"
+      >
+        <img
+          src={winlineBanner2}
+          alt="Winline - Фрибет 3000"
+          className="w-full"
+        />
       </a>
 
       {/* Hot News */}
@@ -24,9 +35,19 @@ export const Sidebar = () => {
           Горячее
         </h3>
         <div className="space-y-0">
-          {hotNews.slice(0, 3).map((article) => (
-            <NewsCard key={article.id} article={article} variant="compact" />
-          ))}
+          {loadingHot ? (
+            [1, 2, 3].map((i) => (
+              <NewsCardSkeleton key={i} variant="compact" />
+            ))
+          ) : hotNews.length > 0 ? (
+            hotNews.map((article) => (
+              <NewsCard key={article.id} article={article} variant="compact" />
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Нет горячих новостей
+            </p>
+          )}
         </div>
       </div>
 
@@ -37,20 +58,48 @@ export const Sidebar = () => {
           Популярное
         </h3>
         <div className="space-y-0">
-          {popularNews.map((article, index) => (
-            <div key={article.id} className="flex items-start gap-3 border-b border-border py-3 last:border-b-0">
-              <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-secondary font-display text-lg font-bold text-muted-foreground">
-                {index + 1}
-              </span>
-              <NewsCard article={article} variant="compact" />
-            </div>
-          ))}
+          {loadingPopular ? (
+            [1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-start gap-3 py-3">
+                <div className="h-8 w-8 animate-pulse rounded bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-full animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-12 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+            ))
+          ) : popularNews.length > 0 ? (
+            popularNews.map((article, index) => (
+              <div
+                key={article.id}
+                className="flex items-start gap-3 border-b border-border py-3 last:border-b-0"
+              >
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-secondary font-display text-lg font-bold text-muted-foreground">
+                  {index + 1}
+                </span>
+                <NewsCard article={article} variant="compact" />
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Нет популярных новостей
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Another Ad Space */}
-      <a href={adLink} target="_blank" rel="noopener noreferrer" className="sticky top-24 block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]">
-        <img src={winlineBanner1} alt="Winline - Верни азарт в футбол" className="w-full" />
+      {/* Sticky Ad Space */}
+      <a
+        href={AD_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="sticky top-24 block overflow-hidden rounded-lg transition-transform hover:scale-[1.02]"
+      >
+        <img
+          src={winlineBanner1}
+          alt="Winline - Верни азарт в футбол"
+          className="w-full"
+        />
       </a>
     </aside>
   );

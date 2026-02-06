@@ -2,31 +2,28 @@ import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
-import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
+import { NewsCardSkeleton } from "@/components/NewsCardSkeleton";
 import { useSearchNews } from "@/hooks/useNews";
 import { searchNews } from "@/data/newsData";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  
+
   const { data: dbResults = [], isLoading } = useSearchNews(query);
-  
+
   // Fallback to mock data search
   const mockResults = searchNews(query);
-  const hasDbResults = dbResults.length > 0;
-  const results = hasDbResults ? dbResults : mockResults;
+  const results = dbResults.length > 0 ? dbResults : mockResults;
 
   return (
     <Layout>
       {/* Header */}
       <div className="border-b border-border bg-secondary/20 py-8">
         <div className="container">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/" className="transition-colors hover:text-foreground">
               Главная
             </Link>
@@ -45,8 +42,14 @@ const SearchPage = () => {
           </motion.div>
           {query && (
             <p className="mt-2 text-muted-foreground">
-              По запросу <span className="text-foreground font-medium">"{query}"</span> найдено{" "}
-              {results.length} {results.length === 1 ? "результат" : results.length < 5 ? "результата" : "результатов"}
+              По запросу{" "}
+              <span className="font-medium text-foreground">"{query}"</span>{" "}
+              найдено {results.length}{" "}
+              {results.length === 1
+                ? "результат"
+                : results.length < 5
+                  ? "результата"
+                  : "результатов"}
             </p>
           )}
         </div>
@@ -60,7 +63,7 @@ const SearchPage = () => {
             {isLoading ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-[300px] w-full rounded-lg" />
+                  <NewsCardSkeleton key={i} />
                 ))}
               </div>
             ) : results.length > 0 ? (
@@ -72,11 +75,7 @@ const SearchPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    {hasDbResults ? (
-                      <NewsCardDb article={article as any} />
-                    ) : (
-                      <NewsCard article={article as any} />
-                    )}
+                    <NewsCard article={article} />
                   </motion.div>
                 ))}
               </div>
@@ -101,7 +100,7 @@ const SearchPage = () => {
 
           {/* Sidebar */}
           <div className="hidden lg:block">
-            {hasDbResults ? <SidebarDb /> : <Sidebar />}
+            <Sidebar />
           </div>
         </div>
       </div>

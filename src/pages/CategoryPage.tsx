@@ -1,33 +1,38 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
-import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
-import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
+import { NewsCardSkeleton } from "@/components/NewsCardSkeleton";
 import { useNewsByCategory } from "@/hooks/useNews";
-import { mockNews, categoryLabels, SportCategory } from "@/data/newsData";
-import { Skeleton } from "@/components/ui/skeleton";
+import { mockNews } from "@/data/newsData";
+import { categoryLabels, type SportCategory } from "@/types/news";
 
 const CategoryPage = () => {
   const { category } = useParams<{ category: SportCategory }>();
   const validCategory = category as SportCategory;
-  
-  const { data: dbNews = [], isLoading } = useNewsByCategory(validCategory, 20);
-  
+
+  const { data: dbNews = [], isLoading } = useNewsByCategory(
+    validCategory,
+    20
+  );
+
   // Fallback to mock data
-  const mockCategoryNews = mockNews.filter((n) => n.category === validCategory);
-  const hasDbNews = dbNews.length > 0;
-  const categoryNews = hasDbNews ? dbNews : mockCategoryNews;
-  
-  const categoryLabel = validCategory ? categoryLabels[validCategory] : "Категория";
+  const mockCategoryNews = mockNews.filter(
+    (n) => n.category === validCategory
+  );
+  const categoryNews = dbNews.length > 0 ? dbNews : mockCategoryNews;
+
+  const categoryLabel = validCategory
+    ? categoryLabels[validCategory]
+    : "Категория";
 
   return (
     <Layout>
       {/* Header */}
       <div className="border-b border-border bg-secondary/20 py-8">
         <div className="container">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Link to="/" className="transition-colors hover:text-foreground">
               Главная
             </Link>
@@ -55,7 +60,7 @@ const CategoryPage = () => {
             {isLoading ? (
               <div className="grid gap-6 sm:grid-cols-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <Skeleton key={i} className="h-[300px] w-full rounded-lg" />
+                  <NewsCardSkeleton key={i} />
                 ))}
               </div>
             ) : categoryNews.length > 0 ? (
@@ -67,11 +72,7 @@ const CategoryPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    {hasDbNews ? (
-                      <NewsCardDb article={article as any} />
-                    ) : (
-                      <NewsCard article={article as any} />
-                    )}
+                    <NewsCard article={article} />
                   </motion.div>
                 ))}
               </div>
@@ -92,7 +93,7 @@ const CategoryPage = () => {
 
           {/* Sidebar */}
           <div className="hidden lg:block">
-            {hasDbNews ? <SidebarDb /> : <Sidebar />}
+            <Sidebar />
           </div>
         </div>
       </div>

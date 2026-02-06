@@ -1,38 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { SportCategory } from "@/data/newsData";
+import type { NewsArticle, SportCategory } from "@/types/news";
 
-export interface NewsArticle {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  image: string | null;
-  category: SportCategory;
-  author: string;
-  published_at: string;
-  views: number;
-  is_hot: boolean;
-  is_live: boolean;
-  tags: string[];
-  source_url: string | null;
-}
+export type { NewsArticle };
 
-// Transform database row to NewsArticle format
-const transformNews = (row: any): NewsArticle => ({
-  id: row.id,
-  title: row.title,
-  excerpt: row.excerpt,
-  content: row.content,
-  image: row.image,
+const transformNews = (row: Record<string, unknown>): NewsArticle => ({
+  id: row.id as string,
+  title: row.title as string,
+  excerpt: row.excerpt as string,
+  content: row.content as string,
+  image: (row.image as string | null) ?? null,
   category: row.category as SportCategory,
-  author: row.author,
-  published_at: row.published_at,
-  views: row.views || 0,
-  is_hot: row.is_hot || false,
-  is_live: row.is_live || false,
-  tags: row.tags || [],
-  source_url: row.source_url,
+  author: row.author as string,
+  published_at: row.published_at as string,
+  views: (row.views as number) ?? 0,
+  is_hot: (row.is_hot as boolean) ?? false,
+  is_live: (row.is_live as boolean) ?? false,
+  tags: (row.tags as string[]) ?? [],
+  source_url: (row.source_url as string | null) ?? null,
 });
 
 export const useAllNews = (limit = 20) => {
@@ -48,6 +33,7 @@ export const useAllNews = (limit = 20) => {
       if (error) throw error;
       return (data || []).map(transformNews);
     },
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -123,7 +109,7 @@ export const useSearchNews = (query: string) => {
     queryKey: ["news", "search", query],
     queryFn: async () => {
       if (!query.trim()) return [];
-      
+
       const { data, error } = await supabase
         .from("news")
         .select("*")
@@ -138,7 +124,11 @@ export const useSearchNews = (query: string) => {
   });
 };
 
-export const useRelatedNews = (category: SportCategory, excludeId: string, limit = 3) => {
+export const useRelatedNews = (
+  category: SportCategory,
+  excludeId: string,
+  limit = 3
+) => {
   return useQuery({
     queryKey: ["news", "related", category, excludeId, limit],
     queryFn: async () => {

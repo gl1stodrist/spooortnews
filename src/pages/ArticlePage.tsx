@@ -3,12 +3,18 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Eye, Share2, Calendar, User } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { SEO } from "@/components/SEO";
-import { SidebarDb } from "@/components/SidebarDb";
 import { Sidebar } from "@/components/Sidebar";
-import { NewsCardDb } from "@/components/NewsCardDb";
 import { NewsCard } from "@/components/NewsCard";
 import { useNewsById, useRelatedNews } from "@/hooks/useNews";
-import { mockNews, categoryLabels, categoryColors, SportCategory } from "@/data/newsData";
+import { mockNews } from "@/data/newsData";
+import {
+  categoryLabels,
+  categoryColors,
+  formatViews,
+  getReadTime,
+  DEFAULT_IMAGE,
+  type SportCategory,
+} from "@/types/news";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
@@ -17,16 +23,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ArticlePage = () => {
   const { id } = useParams();
   const { data: dbArticle, isLoading } = useNewsById(id || "");
-  
+
   // Fallback to mock data if not in database
   const mockArticle = mockNews.find((n) => n.id === id);
-  const article = dbArticle || (mockArticle ? {
-    ...mockArticle,
-    published_at: mockArticle.date,
-    is_hot: mockArticle.isHot || false,
-    is_live: mockArticle.isLive || false,
-    source_url: null,
-  } : null);
+  const article = dbArticle || mockArticle || null;
 
   const { data: relatedNews = [] } = useRelatedNews(
     article?.category as SportCategory,
@@ -38,16 +38,15 @@ const ArticlePage = () => {
   const mockRelated = mockNews
     .filter((n) => n.category === article?.category && n.id !== id)
     .slice(0, 3);
-  
+
   const displayRelated = relatedNews.length > 0 ? relatedNews : mockRelated;
-  const hasDbNews = !!dbArticle;
 
   if (isLoading) {
     return (
       <Layout>
         <div className="container py-8">
           <div className="grid gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6 lg:col-span-2">
               <Skeleton className="h-8 w-48" />
               <Skeleton className="h-12 w-full" />
               <Skeleton className="h-6 w-64" />
@@ -67,7 +66,9 @@ const ArticlePage = () => {
     return (
       <Layout>
         <div className="container py-20 text-center">
-          <h1 className="mb-4 font-display text-4xl font-bold text-foreground">Статья не найдена</h1>
+          <h1 className="mb-4 font-display text-4xl font-bold text-foreground">
+            Статья не найдена
+          </h1>
           <Link to="/" className="text-primary hover:text-primary/80">
             Вернуться на главную
           </Link>
@@ -76,13 +77,10 @@ const ArticlePage = () => {
     );
   }
 
-  const formattedDate = format(
-    new Date(article.published_at),
-    "d MMMM yyyy",
-    { locale: ru }
-  );
-  const readTime = Math.max(1, Math.ceil(article.content.length / 1500));
-  const category = article.category as SportCategory;
+  const formattedDate = format(new Date(article.published_at), "d MMMM yyyy", {
+    locale: ru,
+  });
+  const readTime = getReadTime(article.content);
 
   return (
     <Layout>
@@ -96,6 +94,7 @@ const ArticlePage = () => {
         author={article.author}
         tags={article.tags || []}
       />
+
       {/* Breadcrumbs */}
       <div className="border-b border-border bg-secondary/20 py-3">
         <div className="container">
@@ -105,13 +104,15 @@ const ArticlePage = () => {
             </Link>
             <span>/</span>
             <Link
-              to={`/category/${category}`}
+              to={`/category/${article.category}`}
               className="transition-colors hover:text-foreground"
             >
-              {categoryLabels[category]}
+              {categoryLabels[article.category]}
             </Link>
             <span>/</span>
-            <span className="line-clamp-1 text-foreground">{article.title}</span>
+            <span className="line-clamp-1 text-foreground">
+              {article.title}
+            </span>
           </div>
         </div>
       </div>
@@ -134,8 +135,13 @@ const ArticlePage = () => {
 
             {/* Category Badge */}
             <div className="mb-4">
-              <span className={cn("category-badge text-primary-foreground", categoryColors[category])}>
-                {categoryLabels[category]}
+              <span
+                className={cn(
+                  "category-badge text-primary-foreground",
+                  categoryColors[article.category]
+                )}
+              >
+                {categoryLabels[article.category]}
               </span>
             </div>
 
@@ -160,7 +166,7 @@ const ArticlePage = () => {
               </span>
               <span className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
-                {article.views.toLocaleString()} просмотров
+                {formatViews(article.views)} просмотров
               </span>
               <button className="ml-auto flex items-center gap-1 text-primary transition-colors hover:text-primary/80">
                 <Share2 className="h-4 w-4" />
@@ -171,7 +177,7 @@ const ArticlePage = () => {
             {/* Featured Image */}
             <div className="mb-8 overflow-hidden rounded-lg">
               <img
-                src={article.image || "https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?w=800"}
+                src={article.image || DEFAULT_IMAGE}
                 alt={article.title}
                 className="h-auto w-full object-cover"
               />
@@ -184,8 +190,11 @@ const ArticlePage = () => {
 
             {/* Content */}
             <div className="prose prose-invert max-w-none">
-              {article.content.split('\n\n').map((paragraph, index) => (
-                <p key={index} className="mb-6 text-muted-foreground leading-relaxed">
+              {article.content.split("\n\n").map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="mb-6 leading-relaxed text-muted-foreground"
+                >
                   {paragraph}
                 </p>
               ))}
@@ -218,12 +227,11 @@ const ArticlePage = () => {
                   Похожие новости
                 </h3>
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {displayRelated.map((news: any) => (
-                    hasDbNews ? (
-                      <NewsCardDb key={news.id} article={news} />
-                    ) : (
-                      <NewsCard key={news.id} article={news} />
-                    )
+                  {displayRelated.map((relatedArticle) => (
+                    <NewsCard
+                      key={relatedArticle.id}
+                      article={relatedArticle}
+                    />
                   ))}
                 </div>
               </div>
@@ -232,7 +240,7 @@ const ArticlePage = () => {
 
           {/* Sidebar */}
           <div className="hidden lg:block">
-            {hasDbNews ? <SidebarDb /> : <Sidebar />}
+            <Sidebar />
           </div>
         </div>
       </div>

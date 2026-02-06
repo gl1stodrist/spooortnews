@@ -14,6 +14,18 @@ interface SEOProps {
 const SITE_URL = "https://spooort.ru";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
+const stripHtml = (html: string): string =>
+  html
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const truncateText = (text: string, maxLength: number): string => {
+  const clean = stripHtml(text);
+  if (clean.length <= maxLength) return clean;
+  return clean.slice(0, maxLength - 3) + "...";
+};
+
 export const SEO = ({
   title,
   description,
@@ -27,52 +39,55 @@ export const SEO = ({
   const fullTitle = `${title} | SportNews`;
   const fullUrl = url ? `${SITE_URL}${url}` : SITE_URL;
   const imageUrl = image || DEFAULT_IMAGE;
+  const safeDescription = truncateText(description, 160);
 
-  // JSON-LD Schema for NewsArticle
-  const jsonLd = type === "article" && publishedTime ? {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    "headline": title,
-    "description": description,
-    "image": imageUrl,
-    "datePublished": publishedTime,
-    "author": {
-      "@type": "Person",
-      "name": author || "Редакция SportNews"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "SportNews",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${SITE_URL}/favicon.ico`
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": fullUrl
-    },
-    "keywords": tags.join(", ")
-  } : null;
+  const jsonLd =
+    type === "article" && publishedTime
+      ? {
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          headline: title,
+          description: safeDescription,
+          image: imageUrl,
+          datePublished: publishedTime,
+          author: {
+            "@type": "Person",
+            name: author || "Редакция SportNews",
+          },
+          publisher: {
+            "@type": "Organization",
+            name: "SportNews",
+            logo: {
+              "@type": "ImageObject",
+              url: `${SITE_URL}/favicon.ico`,
+            },
+          },
+          mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": fullUrl,
+          },
+          keywords: tags.join(", "),
+        }
+      : null;
 
   return (
     <Helmet>
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      
+      <meta name="description" content={safeDescription} />
+
       {/* Canonical URL */}
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph */}
       <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:description" content={safeDescription} />
       <meta property="og:image" content={imageUrl} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content="SportNews" />
       <meta property="og:locale" content="ru_RU" />
-      
+
       {type === "article" && publishedTime && (
         <meta property="article:published_time" content={publishedTime} />
       )}
@@ -87,14 +102,12 @@ export const SEO = ({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@SportNews" />
       <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:description" content={safeDescription} />
       <meta name="twitter:image" content={imageUrl} />
 
       {/* JSON-LD Schema */}
       {jsonLd && (
-        <script type="application/ld+json">
-          {JSON.stringify(jsonLd)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       )}
     </Helmet>
   );

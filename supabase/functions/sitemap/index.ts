@@ -29,6 +29,16 @@ Deno.serve(async (req) => {
       throw error;
     }
 
+    // Fetch teams
+    const { data: teams } = await supabase
+      .from('teams')
+      .select('slug, updated_at');
+
+    // Fetch tournaments
+    const { data: tournaments } = await supabase
+      .from('tournaments')
+      .select('slug, sport, updated_at');
+
     const today = new Date().toISOString().split('T')[0];
 
     // Build sitemap XML
@@ -41,10 +51,34 @@ Deno.serve(async (req) => {
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>${SITE_URL}/news</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>${SITE_URL}/about</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>${SITE_URL}/transfers</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${SITE_URL}/matches/today</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${SITE_URL}/matches/tomorrow</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
   </url>`;
 
     // Add category pages
@@ -52,17 +86,49 @@ Deno.serve(async (req) => {
     for (const cat of categories) {
       sitemap += `
   <url>
-    <loc>${SITE_URL}/category/${cat}</loc>
+    <loc>${SITE_URL}/${cat === 'football' ? 'football' : `category/${cat}`}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>`;
     }
 
+    // Add tournament pages
+    if (tournaments) {
+      for (const tournament of tournaments) {
+        const lastmod = tournament.updated_at
+          ? new Date(tournament.updated_at).toISOString().split('T')[0]
+          : today;
+        sitemap += `
+  <url>
+    <loc>${SITE_URL}/football/${tournament.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+      }
+    }
+
+    // Add team pages
+    if (teams) {
+      for (const team of teams) {
+        const lastmod = team.updated_at
+          ? new Date(team.updated_at).toISOString().split('T')[0]
+          : today;
+        sitemap += `
+  <url>
+    <loc>${SITE_URL}/football/rpl/teams/${team.slug}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>`;
+      }
+    }
+
     // Add article pages
     if (articles) {
       for (const article of articles) {
-        const lastmod = article.updated_at 
+        const lastmod = article.updated_at
           ? new Date(article.updated_at).toISOString().split('T')[0]
           : today;
         sitemap += `
@@ -78,7 +144,8 @@ Deno.serve(async (req) => {
     sitemap += `
 </urlset>`;
 
-    console.log(`Generated sitemap with ${(articles?.length || 0) + categories.length + 2} URLs`);
+    const totalUrls = (articles?.length || 0) + (teams?.length || 0) + (tournaments?.length || 0) + categories.length + 6;
+    console.log(`Generated sitemap with ${totalUrls} URLs`);
 
     return new Response(sitemap, {
       headers: corsHeaders,

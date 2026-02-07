@@ -11,6 +11,7 @@ interface SEOProps {
   tags?: string[];
 }
 
+const SITE_NAME = "Spooort.ru";
 const SITE_URL = "https://spooort.ru";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.png`;
 
@@ -36,7 +37,9 @@ export const SEO = ({
   author,
   tags = [],
 }: SEOProps) => {
-  const fullTitle = `${title} | SportNews`;
+  const fullTitle = title.length > 55
+    ? `${truncateText(title, 55)} | ${SITE_NAME}`
+    : `${title} | ${SITE_NAME}`;
   const fullUrl = url ? `${SITE_URL}${url}` : SITE_URL;
   const imageUrl = image || DEFAULT_IMAGE;
   const safeDescription = truncateText(description, 160);
@@ -46,17 +49,18 @@ export const SEO = ({
       ? {
           "@context": "https://schema.org",
           "@type": "NewsArticle",
-          headline: title,
+          headline: truncateText(title, 110),
           description: safeDescription,
           image: imageUrl,
           datePublished: publishedTime,
           author: {
             "@type": "Person",
-            name: author || "Редакция SportNews",
+            name: author || `Редакция ${SITE_NAME}`,
           },
           publisher: {
             "@type": "Organization",
-            name: "SportNews",
+            name: SITE_NAME,
+            url: SITE_URL,
             logo: {
               "@type": "ImageObject",
               url: `${SITE_URL}/favicon.ico`,
@@ -80,12 +84,12 @@ export const SEO = ({
       <link rel="canonical" href={fullUrl} />
 
       {/* Open Graph */}
-      <meta property="og:title" content={title} />
+      <meta property="og:title" content={truncateText(title, 60)} />
       <meta property="og:description" content={safeDescription} />
       <meta property="og:image" content={imageUrl} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={type} />
-      <meta property="og:site_name" content="SportNews" />
+      <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="ru_RU" />
 
       {type === "article" && publishedTime && (
@@ -100,8 +104,8 @@ export const SEO = ({
 
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@SportNews" />
-      <meta name="twitter:title" content={title} />
+      <meta name="twitter:site" content={`@${SITE_NAME}`} />
+      <meta name="twitter:title" content={truncateText(title, 60)} />
       <meta name="twitter:description" content={safeDescription} />
       <meta name="twitter:image" content={imageUrl} />
 

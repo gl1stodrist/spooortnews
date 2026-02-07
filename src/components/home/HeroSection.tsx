@@ -76,8 +76,9 @@ export const HeroSection = ({
                 >
                   <img
                     src={article.image || DEFAULT_IMAGE}
-                    alt={article.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    alt={`${article.title} — spooort.ru`}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4">

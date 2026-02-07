@@ -2,9 +2,9 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, X, TrendingUp } from "lucide-react";
+import { Search, Menu, X, TrendingUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { categoryLabels, SportCategory } from "@/data/newsData";
+import { categoryLabels, type SportCategory } from "@/types/news";
 
 const categories: SportCategory[] = [
   "football",
@@ -13,7 +13,13 @@ const categories: SportCategory[] = [
   "tennis",
   "motorsport",
   "mma",
-  "olympics",
+];
+
+const quickLinks = [
+  { label: "Новости", href: "/news" },
+  { label: "Футбол", href: "/football" },
+  { label: "Трансферы", href: "/transfers" },
+  { label: "Матчи сегодня", href: "/matches/today" },
 ];
 
 export const Header = () => {
@@ -39,10 +45,17 @@ export const Header = () => {
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span>{format(new Date(), "d MMMM yyyy", { locale: ru })}</span>
             <span className="hidden sm:inline">|</span>
-            <span className="hidden items-center gap-1 sm:flex">
-              <TrendingUp className="h-3 w-3 text-primary" />
-              Топ: Эль-Класико
-            </span>
+            <nav className="hidden items-center gap-3 sm:flex">
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <Link to="/about" className="text-muted-foreground transition-colors hover:text-foreground">
@@ -63,7 +76,7 @@ export const Header = () => {
             <span className="font-display text-xl font-bold text-primary-foreground">S</span>
           </div>
           <span className="hidden font-display text-2xl font-bold tracking-tight sm:inline">
-            SPORT<span className="text-primary">NEWS</span>
+            SPOOORT<span className="text-primary">.RU</span>
           </span>
         </Link>
 
@@ -72,7 +85,7 @@ export const Header = () => {
           {categories.map((cat) => (
             <Link
               key={cat}
-              to={`/category/${cat}`}
+              to={cat === "football" ? "/football" : `/category/${cat}`}
               className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {categoryLabels[cat]}
@@ -82,7 +95,6 @@ export const Header = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Search Button */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
@@ -91,7 +103,6 @@ export const Header = () => {
             <Search className="h-5 w-5" />
           </button>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
@@ -143,10 +154,22 @@ export const Header = () => {
             className="border-t border-border bg-background lg:hidden"
           >
             <nav className="container flex flex-col py-4">
+              {/* Quick Links */}
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="border-b border-border py-3 text-sm font-bold text-foreground transition-colors hover:text-primary"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {/* Categories */}
               {categories.map((cat) => (
                 <Link
                   key={cat}
-                  to={`/category/${cat}`}
+                  to={cat === "football" ? "/football" : `/category/${cat}`}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="border-b border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground last:border-b-0"
                 >

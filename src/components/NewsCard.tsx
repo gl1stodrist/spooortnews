@@ -51,6 +51,7 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
   const formattedDate = formatPublishedDate(article.published_at);
   const readTime = getReadTime(article.content);
   const imageUrl = article.image || DEFAULT_IMAGE;
+  const imageAlt = `${article.title} — ${categoryLabels[article.category]}`;
 
   if (variant === "featured") {
     return (
@@ -63,8 +64,9 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
         <Link to={`/article/${article.id}`} className="absolute inset-0">
           <img
             src={imageUrl}
-            alt={article.title}
+            alt={imageAlt}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
@@ -127,8 +129,9 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
         >
           <img
             src={imageUrl}
-            alt={article.title}
+            alt={imageAlt}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
           />
         </Link>
         <div className="flex flex-col justify-center">
@@ -164,8 +167,9 @@ export const NewsCard = ({ article, variant = "default" }: NewsCardProps) => {
         <div className="relative aspect-video overflow-hidden">
           <img
             src={imageUrl}
-            alt={article.title}
+            alt={imageAlt}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 

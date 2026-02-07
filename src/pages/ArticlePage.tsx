@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Eye, Share2, Calendar, User } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { SEO } from "@/components/SEO";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
+import { WinlineBanner } from "@/components/WinlineBanner";
 import { useNewsById, useRelatedNews } from "@/hooks/useNews";
 import { mockNews } from "@/data/newsData";
 import {
@@ -24,7 +26,6 @@ const ArticlePage = () => {
   const { id } = useParams();
   const { data: dbArticle, isLoading } = useNewsById(id || "");
 
-  // Fallback to mock data if not in database
   const mockArticle = mockNews.find((n) => n.id === id);
   const article = dbArticle || mockArticle || null;
 
@@ -34,7 +35,6 @@ const ArticlePage = () => {
     3
   );
 
-  // Fallback related news from mock
   const mockRelated = mockNews
     .filter((n) => n.category === article?.category && n.id !== id)
     .slice(0, 3);
@@ -82,6 +82,11 @@ const ArticlePage = () => {
   });
   const readTime = getReadTime(article.content);
 
+  const breadcrumbs = [
+    { label: categoryLabels[article.category], href: `/category/${article.category}` },
+    { label: article.title },
+  ];
+
   return (
     <Layout>
       <SEO
@@ -95,27 +100,7 @@ const ArticlePage = () => {
         tags={article.tags || []}
       />
 
-      {/* Breadcrumbs */}
-      <div className="border-b border-border bg-secondary/20 py-3">
-        <div className="container">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/" className="transition-colors hover:text-foreground">
-              Главная
-            </Link>
-            <span>/</span>
-            <Link
-              to={`/category/${article.category}`}
-              className="transition-colors hover:text-foreground"
-            >
-              {categoryLabels[article.category]}
-            </Link>
-            <span>/</span>
-            <span className="line-clamp-1 text-foreground">
-              {article.title}
-            </span>
-          </div>
-        </div>
-      </div>
+      <Breadcrumbs items={breadcrumbs} />
 
       <div className="container py-8">
         <div className="grid gap-8 lg:grid-cols-3">
@@ -174,12 +159,16 @@ const ArticlePage = () => {
               </button>
             </div>
 
+            {/* Winline Banner - under title */}
+            <WinlineBanner variant="horizontal" className="mb-8" />
+
             {/* Featured Image */}
             <div className="mb-8 overflow-hidden rounded-lg">
               <img
                 src={article.image || DEFAULT_IMAGE}
-                alt={article.title}
+                alt={`${article.title} — ${categoryLabels[article.category]}`}
                 className="h-auto w-full object-cover"
+                loading="lazy"
               />
             </div>
 
@@ -200,6 +189,9 @@ const ArticlePage = () => {
               ))}
             </div>
 
+            {/* Winline Banner - between content and tags */}
+            <WinlineBanner variant="horizontal" className="my-8" />
+
             {/* Tags */}
             {article.tags && article.tags.length > 0 && (
               <div className="mt-8 border-t border-border pt-6">
@@ -217,6 +209,20 @@ const ArticlePage = () => {
                     </Link>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Source */}
+            {article.source_url && (
+              <div className="mt-4">
+                <a
+                  href={article.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer nofollow"
+                  className="text-xs text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Источник →
+                </a>
               </div>
             )}
 

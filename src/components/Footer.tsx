@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { categoryLabels, SportCategory } from "@/data/newsData";
-import winlineBanner1 from "@/assets/winline-banner-1.png";
+import { categoryLabels, type SportCategory } from "@/types/news";
+import { WinlineBanner } from "./WinlineBanner";
 
 const categories: SportCategory[] = [
   "football",
@@ -9,22 +9,35 @@ const categories: SportCategory[] = [
   "tennis",
   "motorsport",
   "mma",
-  "olympics",
+];
+
+const seoPages = [
+  { label: "Новости спорта", href: "/news" },
+  { label: "Футбол", href: "/football" },
+  { label: "Трансферы", href: "/transfers" },
+  { label: "Матчи сегодня", href: "/matches/today" },
+  { label: "Матчи завтра", href: "/matches/tomorrow" },
+];
+
+const tournaments = [
+  { label: "РПЛ", href: "/football/rpl" },
+  { label: "Лига чемпионов", href: "/football/liga-chempionov" },
+  { label: "Кубок России", href: "/football/kubok-rossii" },
 ];
 
 export const Footer = () => {
   return (
     <footer className="mt-auto border-t border-border bg-secondary/30">
       <div className="container py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-5">
           {/* Brand */}
-          <div className="md:col-span-1">
+          <div className="sm:col-span-2 md:col-span-1">
             <Link to="/" className="mb-4 flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded bg-primary">
                 <span className="font-display text-xl font-bold text-primary-foreground">S</span>
               </div>
               <span className="font-display text-xl font-bold tracking-tight">
-                SPORT<span className="text-primary">NEWS</span>
+                SPOOORT<span className="text-primary">.RU</span>
               </span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
@@ -38,10 +51,10 @@ export const Footer = () => {
               Разделы
             </h4>
             <ul className="space-y-2">
-              {categories.slice(0, 4).map((cat) => (
+              {categories.map((cat) => (
                 <li key={cat}>
                   <Link
-                    to={`/category/${cat}`}
+                    to={cat === "football" ? "/football" : `/category/${cat}`}
                     className="text-sm text-muted-foreground transition-colors hover:text-primary"
                   >
                     {categoryLabels[cat]}
@@ -51,19 +64,32 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* More Categories */}
+          {/* SEO Pages */}
           <div>
             <h4 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-foreground">
-              Ещё
+              Популярное
             </h4>
             <ul className="space-y-2">
-              {categories.slice(4).map((cat) => (
-                <li key={cat}>
-                  <Link
-                    to={`/category/${cat}`}
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {categoryLabels[cat]}
+              {seoPages.map((page) => (
+                <li key={page.href}>
+                  <Link to={page.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                    {page.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tournaments */}
+          <div>
+            <h4 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-foreground">
+              Турниры
+            </h4>
+            <ul className="space-y-2">
+              {tournaments.map((t) => (
+                <li key={t.href}>
+                  <Link to={t.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">
+                    {t.label}
                   </Link>
                 </li>
               ))}
@@ -82,16 +108,6 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                  Редакция
-                </Link>
-              </li>
-              <li>
-                <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-                  Реклама
-                </Link>
-              </li>
-              <li>
                 <a href="https://t.me/ivan_nogdanov" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground transition-colors hover:text-primary">
                   Контакты
                 </a>
@@ -103,14 +119,11 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © 2026 SportNews. Все права защищены.
+            © 2026 Spooort.ru — Все права защищены.
           </p>
           <div className="flex gap-6">
-            <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+            <Link to="/about" className="text-sm text-muted-foreground transition-colors hover:text-primary">
               Политика конфиденциальности
-            </Link>
-            <Link to="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
-              Условия использования
             </Link>
           </div>
         </div>
@@ -119,14 +132,7 @@ export const Footer = () => {
       {/* Ad Space */}
       <div className="border-t border-border bg-muted/30 py-4">
         <div className="container">
-          <a 
-            href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="block overflow-hidden rounded-lg transition-transform hover:scale-[1.01]"
-          >
-            <img src={winlineBanner1} alt="Winline - Верни азарт в футбол" className="w-full" />
-          </a>
+          <WinlineBanner variant="horizontal" />
         </div>
       </div>
     </footer>

@@ -1,5 +1,5 @@
 // Step 2: Use FREE Google Gemini directly
-    const GEMINI_API_KEY = Deno.env.get('AIzaSyDv6EC6JtIRuPqOeLrj8Iz6o0HyWOi6Tks');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     const processedArticles = [];
     
     for (const article of allArticles.slice(0, 10)) {

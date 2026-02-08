@@ -8,6 +8,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Исправляем проблему с CORS для браузера
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   try {
@@ -17,38 +18,37 @@ serve(async (req) => {
     )
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
-    // 1. Получаем новости (простой и надежный RSS)
+    // 1. Берем новости из RSS Sports.ru
     const rssResponse = await fetch('https://www.sports.ru/rss/main.xml');
     const xmlData = await rssResponse.text();
     const parser = new XMLParser();
     const result = parser.parse(xmlData);
-    const rawArticles = result.rss?.channel?.item || [];
+    const items = result.rss?.channel?.item || [];
     
-    console.log(`Найдено в RSS: ${rawArticles.length}`);
-
+    // Берем 3 самые свежие новости
+    const rawArticles = Array.isArray(items) ? items.slice(0, 3) : [items];
     const processedArticles = [];
-    
-    // Берем 3 новости для теста, чтобы не перегружать
-    for (const item of rawArticles.slice(0, 3)) {
-      const title = item.title;
-      const description = item.description || "";
+
+    for (const item of rawArticles) {
       const link = item.link;
 
-      // Проверяем, нет ли уже такой новости
+      // Проверяем, нет ли уже этой ссылки в таблице posts
       const { data: exists } = await supabase.from('posts').select('id').eq('source_url', link).maybeSingle();
       if (exists) continue;
 
-      // Просим Gemini переписать
+      // Просим Gemini переписать новость
       const aiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Ты спортивный журналист. Перепиши новость в JSON формате: {"title": "заголовок", "excerpt": "кратко", "content": "текст", "tags": ["спорт"]}. Новость: ${title}. Текст: ${description}` }] }]
+          contents: [{ parts: [{ text: `Ты спортивный журналист. Перепиши новость в JSON формате: {"title": "заголовок", "excerpt": "краткое описание", "content": "полный текст", "tags": ["спорт"]}. Текст для переработки: ${item.title}. ${item.description}` }] }]
         })
       });
 
       const aiData = await aiResponse.json();
       const rawText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      
+      // Очищаем JSON от лишних символов, если Gemini их добавил
       const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
       const parsed = JSON.parse(cleanJson);
 
@@ -58,16 +58,17 @@ serve(async (req) => {
         content: parsed.content,
         tags: parsed.tags,
         source_url: link,
-        image_url: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800"
+        image_url: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800" // Стандартное фото спорта
       });
     }
 
+    // 2. Сохраняем результат в таблицу posts
     if (processedArticles.length > 0) {
-      const { error } = await supabase.from('posts').insert(processedArticles);
-      if (error) throw error;
+      const { error: insertError } = await supabase.from('posts').insert(processedArticles);
+      if (insertError) throw insertError;
     }
 
-    return new Response(JSON.stringify({ message: `Успешно. Сохранено: ${processedArticles.length}` }), {
+    return new Response(JSON.stringify({ message: `Успех! Сохранено новостей: ${processedArticles.length}` }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 

@@ -1,7 +1,7 @@
 name: Deploy Vite Site
 on:
   push:
-    branches: ["основной"] # У вас ветка называется именно так
+    branches: ["main"] # У вас ветка называется именно так
   workflow_dispatch:
 
 permissions:

@@ -38,8 +38,9 @@ const Index = () => {
   const handleParseNews = useCallback(async () => {
     setIsParsing(true);
     try {
+      // ИСПРАВЛЕНО: Теперь вызываем smart-api
       const { data, error } = await supabase.functions.invoke(
-        "parse-sports-news"
+        "smart-api"
       );
 
       if (error) throw error;

@@ -5,10 +5,11 @@ import { NewsGrid } from "@/components/NewsGrid";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Header />
+      {/* Проверяем наличие компонентов перед рендером */}
+      {Header && <Header />}
       
       <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 uppercase italic tracking-tighter">
+        <h1 className="text-3xl font-bold mb-8 uppercase italic tracking-tighter text-white">
           Главные инсайды
         </h1>
 
@@ -21,16 +22,16 @@ const Index = () => {
           marginBottom: '40px',
           textAlign: 'center'
         }}>
-          <div style={{ color: '#eab308', fontWeight: 'bold', fontSize: '14px', marginBottom: '10px' }}>
+          <div style={{ color: '#eab308', fontWeight: 'bold', fontSize: '12px', marginBottom: '10px' }}>
             🔒 ЭКСКЛЮЗИВНЫЙ VIP ДОСТУП
           </div>
           
-          <h2 style={{ color: 'white', fontSize: '24px', fontWeight: '900', marginBottom: '15px', textTransform: 'uppercase' }}>
+          <h2 style={{ color: 'white', fontSize: '22px', fontWeight: '900', marginBottom: '15px', textTransform: 'uppercase' }}>
             СЛИВ: Точный счет матча Лиги Чемпионов 🔥
           </h2>
           
           <div style={{ position: 'relative', marginBottom: '25px' }}>
-            <p style={{ color: '#444', filter: 'blur(5px)', fontSize: '16px', userSelect: 'none' }}>
+            <p style={{ color: '#444', filter: 'blur(5px)', fontSize: '16px' }}>
               Текст скрыт. Здесь находится информация о точном счете, которую мы получили от надежного источника...
             </p>
           </div>
@@ -55,13 +56,12 @@ const Index = () => {
             ПОЛУЧИТЬ ДОСТУП БЕСПЛАТНО
           </a>
         </div>
-        {/* --- КОНЕЦ VIP БЛОКА --- */}
 
-        {/* Это вернет твои новости на место */}
-        <NewsGrid />
+        {/* Возвращаем сетку новостей */}
+        {NewsGrid && <NewsGrid />}
       </main>
 
-      <Footer />
+      {Footer && <Footer />}
     </div>
   );
 };

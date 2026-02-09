@@ -1,24 +1,62 @@
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { NewsGrid } from "@/components/NewsGrid";
+
 const Index = () => {
   return (
-    <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1 style={{ textAlign: 'center', fontSize: '30px', fontWeight: 'bold' }}>SPOOORT.RU</h1>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
       
-      <div style={{
-        border: '2px solid gold',
-        padding: '20px',
-        borderRadius: '15px',
-        marginTop: '30px',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ color: 'gold' }}>🔒 VIP ИНСАЙД</h2>
-        <p style={{ filter: 'blur(5px)' }}>Здесь очень секретный текст про точный счет матча...</p>
-        <a href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" 
-           style={{ background: 'gold', color: 'black', padding: '10px 20px', borderRadius: '5px', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block', marginTop: '10px' }}>
-          ОТКРЫТЬ ДОСТУП
-        </a>
-      </div>
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8 uppercase italic tracking-tighter">
+          Главные инсайды
+        </h1>
 
-      <p style={{ marginTop: '50px', textAlign: 'center', color: '#666' }}>Новости загружаются...</p>
+        {/* --- НАШ VIP БЛОК --- */}
+        <div style={{
+          backgroundColor: '#111',
+          border: '2px solid #eab308',
+          borderRadius: '16px',
+          padding: '24px',
+          marginBottom: '40px',
+          textAlign: 'center'
+        }}>
+          <div style={{ color: '#eab308', fontWeight: 'bold', fontSize: '14px', marginBottom: '10px' }}>
+            🔒 VIP ДОСТУП
+          </div>
+          
+          <h2 style={{ color: 'white', fontSize: '22px', fontWeight: '900', marginBottom: '15px', textTransform: 'uppercase' }}>
+            Точный счет матча Лиги Чемпионов 🔥
+          </h2>
+          
+          <p style={{ color: '#666', filter: 'blur(5px)', marginBottom: '20px', userSelect: 'none' }}>
+            Этот текст скрыт. Здесь находится эксклюзивная информация о матче и точном счете, которую мы получили от надежного источника...
+          </p>
+
+          <a 
+            href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{
+              display: 'block',
+              backgroundColor: '#eab308',
+              color: 'black',
+              padding: '16px',
+              borderRadius: '12px',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              fontSize: '18px'
+            }}
+          >
+            ПОЛУЧИТЬ ДОСТУП БЕСПЛАТНО
+          </a>
+        </div>
+        {/* --- КОНЕЦ VIP БЛОКА --- */}
+
+        <NewsGrid />
+      </main>
+
+      <Footer />
     </div>
   );
 };

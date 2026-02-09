@@ -8,7 +8,7 @@ const Index = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
 
-  // Табло, которое работает ВСЕГДА (даже если GitHub или API глючат)
+  // ГАРАНТИРОВАННОЕ ТАБЛО (Для максимальной конверсии)
   const [liveMatches] = useState([
     { id: 1, competition: { name: "Лига Чемпионов" }, homeTeam: { shortName: "Реал Мадрид" }, awayTeam: { shortName: "Ман Сити" }, status: "IN_PLAY", score: { fullTime: { home: 2, away: 1 } }, utcDate: "LIVE" },
     { id: 2, competition: { name: "АПЛ" }, homeTeam: { shortName: "Ливерпуль" }, awayTeam: { shortName: "Челси" }, status: "IN_PLAY", score: { fullTime: { home: 0, away: 0 } }, utcDate: "LIVE" },
@@ -17,7 +17,12 @@ const Index = () => {
 
   const fetchPosts = async () => {
     const { data } = await supabase.from("posts").select("*").order("created_at", { ascending: false });
-    setPosts(data || []);
+    // ФИКС КАРТИНОК: Если в базе нет картинки, ставим сочный стадион
+    const postsWithImages = data?.map(post => ({
+      ...post,
+      image_url: post.image_url || `https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1000&auto=format&fit=crop`
+    })) || [];
+    setPosts(postsWithImages);
   };
 
   const handleUpdate = async () => {
@@ -26,7 +31,7 @@ const Index = () => {
       await supabase.functions.invoke('smart-api');
       await fetchPosts();
     } catch (err) {
-      console.error("Update failed", err);
+      console.error("Update error", err);
     }
     setIsUpdating(false);
   };
@@ -49,7 +54,7 @@ const Index = () => {
             <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center font-black text-2xl italic shadow-[0_0_20px_rgba(220,38,38,0.5)]">S</div>
             <h1 className="text-2xl font-black italic tracking-tighter uppercase text-red-600">PRO-SPORTS</h1>
           </div>
-          <Button onClick={handleUpdate} disabled={isUpdating} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase text-[10px] h-9 rounded-none px-6 shadow-lg shadow-red-600/20">
+          <Button onClick={handleUpdate} disabled={isUpdating} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase text-[10px] h-9 rounded-none px-6">
             <RefreshCw size={14} className={`mr-2 ${isUpdating ? "animate-spin" : ""}`} /> 
             {isUpdating ? "ЗАГРУЗКА..." : "ОБНОВИТЬ ИНСАЙДЫ"}
           </Button>
@@ -69,7 +74,7 @@ const Index = () => {
                 </div>
                 <div className="p-8 md:w-3/5 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-4 mb-4 text-[10px] font-bold text-gray-500 uppercase">
+                    <div className="flex items-center gap-4 mb-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                       <span className="text-red-600">{new Date(post.created_at).toLocaleDateString()}</span>
                       <span className="flex items-center gap-1"><Eye size={12}/> {Math.floor(Math.random() * 5000 + 1000)}</span>
                     </div>
@@ -81,10 +86,11 @@ const Index = () => {
                   </button>
                 </div>
               </article>
-
+              
+              {/* РЕКЛАМНЫЙ БЛОК */}
               {(index + 1) % 3 === 0 && (
                 <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full border-2 border-[#ff5c00] hover:scale-[1.01] transition-all overflow-hidden rounded-sm shadow-xl">
-                  <img src={index % 2 === 0 ? "/banner_chips.png" : "/banner_ronaldinho.png"} alt="Winline" className="w-full h-auto" />
+                  <img src="/banner_chips.png" alt="Winline" className="w-full h-auto" />
                 </a>
               )}
             </div>
@@ -104,7 +110,7 @@ const Index = () => {
                       <span>{match.competition.name}</span>
                       <span className={match.utcDate === 'LIVE' ? "text-red-600 animate-pulse" : ""}>{match.utcDate}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[11px] font-black uppercase italic">
+                    <div className="flex justify-between items-center text-[11px] font-black uppercase italic tracking-tighter">
                       <span className="truncate mr-2">{match.homeTeam.shortName} - {match.awayTeam.shortName}</span>
                       <span className="text-red-500 shrink-0">
                         {match.score.fullTime.home !== null ? `${match.score.fullTime.home}:${match.score.fullTime.away}` : 'VS'}
@@ -122,19 +128,20 @@ const Index = () => {
         </aside>
       </main>
 
+      {/* МОДАЛКА С БОЛЬШОЙ КНОПКОЙ */}
       {selectedPost && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md overflow-y-auto">
-          <div className="relative bg-[#161920] max-w-5xl w-full my-auto border border-white/10 shadow-2xl flex flex-col md:flex-row rounded-sm overflow-hidden">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+          <div className="relative bg-[#161920] max-w-5xl w-full border border-white/10 shadow-2xl flex flex-col md:flex-row overflow-hidden">
             <button onClick={() => setSelectedPost(null)} className="absolute top-4 right-4 text-white hover:text-red-500 z-10 p-2 bg-black/50 rounded-full">
               <X size={24} />
             </button>
             <div className="md:w-2/3 p-6 md:p-12 border-r border-white/5 bg-[#1a1d24]">
               <img src={selectedPost.image_url} className="w-full h-80 object-cover mb-8 shadow-2xl rounded-sm" alt="" />
-              <h2 className="text-3xl md:text-5xl font-black uppercase italic mb-8 leading-tight tracking-tighter">{selectedPost.title}</h2>
-              <div className="text-gray-300 text-lg leading-relaxed mb-12 italic border-l-4 border-red-600 pl-6 bg-white/5 py-6 pr-6">
+              <h2 className="text-3xl md:text-5xl font-black uppercase italic mb-8 tracking-tighter">{selectedPost.title}</h2>
+              <div className="text-gray-300 text-lg leading-relaxed mb-12 italic border-l-4 border-red-600 pl-6 bg-white/5 py-8">
                 {selectedPost.excerpt}
               </div>
-              <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-[#ff5c00] text-black text-center py-6 font-black uppercase italic text-2xl hover:bg-white transition-all shadow-2xl">
+              <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-[#ff5c00] text-black text-center py-6 font-black uppercase italic text-2xl hover:bg-white transition-all">
                 ПОСТАВИТЬ В WINLINE 🚀
               </a>
             </div>

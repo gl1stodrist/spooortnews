@@ -28,25 +28,26 @@ const Index = () => {
 
   const WINLINE_URL = "https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg";
   
-  // Баннеры вшиты напрямую, чтобы избежать "Image not found"
-  const BANNER_1_BASE64 = "https://i.postimg.cc/mD8m88S3/753-155.png"; 
-  const BANNER_2_BASE64 = "https://i.postimg.cc/BvNfNf8P/753-155-1.png";
+  // Локальные пути к твоим баннерам в папке public
+  const B_CHIPS = "/banner_chips.png"; 
+  const B_RONALDINHO = "/banner_ronaldinho.png";
 
   return (
     <div className="min-h-screen bg-[#0d0f12] text-white font-sans selection:bg-red-600">
-      <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block bg-[#ff5c00] text-black text-center py-2 font-black text-[10px] uppercase tracking-[0.3em] sticky top-0 z-[100] hover:bg-white transition-colors">
-        WINLINE: ЗАБИРАЙ ФРИБЕТ 3000 РУБЛЕЙ ПРЯМО СЕЙЧАС! ⚡️
+      {/* ЛИПКАЯ ШАПКА WINLINE */}
+      <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block bg-[#ff5c00] text-black text-center py-2 font-black text-[10px] uppercase tracking-[0.3em] sticky top-0 z-[100] hover:bg-white transition-all shadow-[0_5px_20px_rgba(255,92,0,0.3)]">
+        WINLINE: ТВОЙ ФРИБЕТ 3000 РУБЛЕЙ ЗДЕСЬ ⚡️ ЗАБРАТЬ СЕЙЧАС
       </a>
 
       <header className="border-b border-white/5 bg-[#161920]/90 backdrop-blur-md sticky top-[34px] z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src="/favicon.png" alt="S" className="w-8 h-8 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.5)]" />
+            <img src="/favicon.png" alt="S" className="w-8 h-8 rounded-full shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
             <h1 className="text-2xl font-black italic tracking-tighter uppercase text-red-600">PRO-SPORTS</h1>
           </div>
-          <Button onClick={handleUpdate} disabled={isUpdating} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase text-[10px] h-9 rounded-none px-6">
+          <Button onClick={handleUpdate} disabled={isUpdating} className="bg-red-600 hover:bg-red-700 text-white font-black uppercase text-[10px] h-9 rounded-none px-6 transition-all active:scale-95">
             <RefreshCw size={14} className={`mr-2 ${isUpdating ? "animate-spin" : ""}`} /> 
-            {isUpdating ? "ОБНОВЛЕНИЕ..." : "ОБНОВИТЬ ИНСАЙДЫ"}
+            {isUpdating ? "ОБНОВЛЯЕМ..." : "ОБНОВИТЬ ИНСАЙДЫ"}
           </Button>
         </div>
       </header>
@@ -55,10 +56,10 @@ const Index = () => {
         <div className="flex-1 space-y-8">
           {posts.map((post, index) => (
             <div key={post.id} className="space-y-8">
-              <article className="bg-[#161920] border border-white/5 group hover:border-red-600/30 transition-all shadow-2xl rounded-sm overflow-hidden flex flex-col md:flex-row">
+              <article className="bg-[#161920] border border-white/5 group hover:border-red-600/30 transition-all shadow-xl rounded-sm overflow-hidden flex flex-col md:flex-row">
                 <div className="md:w-2/5 relative overflow-hidden cursor-pointer min-h-[220px]" onClick={() => setSelectedPost(post)}>
                   <img src={post.image_url} alt={post.title} className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" />
-                  <div className="absolute top-4 left-4 bg-red-600 px-3 py-1 text-[10px] font-black uppercase shadow-lg">ИНСАЙД</div>
+                  <div className="absolute top-4 left-4 bg-red-600 px-3 py-1 text-[10px] font-black uppercase">ИНСАЙД</div>
                 </div>
                 <div className="p-8 md:w-3/5 flex flex-col justify-between">
                   <div>
@@ -77,9 +78,10 @@ const Index = () => {
                 </div>
               </article>
 
+              {/* БАННЕР В ЛЕНТЕ КАЖДЫЕ 3 НОВОСТИ */}
               {(index + 1) % 3 === 0 && (
-                <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full border-2 border-[#ff5c00] hover:opacity-90 transition-all overflow-hidden rounded-sm shadow-orange-500/20 shadow-lg">
-                  <img src={index % 2 === 0 ? BANNER_1_BASE64 : BANNER_2_BASE64} alt="Winline" className="w-full h-auto" />
+                <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full border-2 border-[#ff5c00] hover:scale-[1.01] transition-transform overflow-hidden rounded-sm shadow-orange-500/20 shadow-2xl">
+                  <img src={index % 2 === 0 ? B_CHIPS : B_RONALDINHO} alt="Winline" className="w-full h-auto" />
                 </a>
               )}
             </div>
@@ -88,10 +90,10 @@ const Index = () => {
 
         <aside className="w-full lg:w-80 space-y-6">
           <div className="sticky top-32 space-y-6">
-            <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block bg-[#161920] p-1 border-2 border-[#ff5c00] hover:scale-[1.03] transition-transform">
+            <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block bg-[#161920] p-1 border-2 border-[#ff5c00] hover:scale-[1.03] transition-transform shadow-lg">
               <div className="bg-[#ff5c00] p-6 text-center shadow-inner">
                 <span className="block text-black font-black text-4xl italic uppercase leading-none">WINLINE</span>
-                <span className="block text-white font-bold text-[10px] uppercase mt-2 bg-black py-1 tracking-tighter">ЛУЧШИЕ КОЭФФИЦИЕНТЫ ТУТ</span>
+                <span className="block text-white font-bold text-[10px] uppercase mt-2 bg-black py-1">ФРИБЕТ 3000₽</span>
               </div>
             </a>
             
@@ -122,21 +124,22 @@ const Index = () => {
             </button>
             <div className="md:w-2/3 p-6 md:p-12 border-r border-white/5 bg-[#1a1d24]">
               <img src={selectedPost.image_url} className="w-full h-72 object-cover mb-8 shadow-2xl border border-white/5 rounded-sm" alt="" />
-              <h2 className="text-3xl md:text-5xl font-black uppercase italic mb-8 leading-tight">{selectedPost.title}</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase italic mb-8 leading-tight tracking-tighter">{selectedPost.title}</h2>
               
-              <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block mb-8 border-2 border-[#ff5c00] hover:scale-[1.01] transition-transform">
-                 <img src={BANNER_2_BASE64} alt="Winline" className="w-full h-auto" />
+              {/* БАННЕР ВНУТРИ НОВОСТИ ДЛЯ КОНВЕРСИИ */}
+              <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block mb-8 border-2 border-[#ff5c00] hover:scale-[1.01] transition-transform shadow-xl">
+                 <img src={B_RONALDINHO} alt="Winline" className="w-full h-auto" />
               </a>
 
               <div className="text-gray-300 text-lg leading-relaxed space-y-6 mb-12 italic border-l-4 border-red-600 pl-6 bg-white/5 py-4 pr-4">
                 {selectedPost.excerpt}
               </div>
               <a href={WINLINE_URL} target="_blank" rel="noopener noreferrer" className="block w-full bg-[#ff5c00] text-black text-center py-6 font-black uppercase italic text-2xl hover:bg-white transition-all shadow-orange-600/40 shadow-2xl">
-                СДЕЛАТЬ СТАВКУ НА ЭТОТ МАТЧ В WINLINE 🚀
+                ПОСТАВИТЬ В WINLINE (ФРИБЕТ 3000₽) 🚀
               </a>
             </div>
             <div className="md:w-1/3 p-8 bg-black/40 hidden md:block">
-              <h3 className="font-black text-[10px] uppercase tracking-widest mb-8 text-red-500 italic">ЧИТАЙТЕ ТАКЖЕ:</h3>
+              <h3 className="font-black text-[10px] uppercase tracking-widest mb-8 text-red-500 underline decoration-2 underline-offset-8 italic">ЕЩЕ ИНСАЙДЫ:</h3>
               <div className="space-y-8">
                 {posts.filter(p => p.id !== selectedPost.id).slice(0, 4).map(p => (
                   <div key={p.id} onClick={() => setSelectedPost(p)} className="cursor-pointer group border-b border-white/5 pb-6 last:border-0">

@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NewsGrid } from "@/components/NewsGrid";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import { Zap, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,13 +11,13 @@ const Index = () => {
 
   const handleUpdateInsides = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('smart-api');
+      const { error } = await supabase.functions.invoke('smart-api');
       if (error) throw error;
       toast({
         title: "Успешно!",
         description: "Новые инсайды уже в канале и на сайте.",
       });
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1000);
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -33,36 +33,38 @@ const Index = () => {
       <Header />
       
       <main className="flex-grow container mx-auto px-4 py-8">
-        {/* Кнопка обновления (твоя рабочая функция) */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold italic tracking-tighter">ГЛАВНЫЕ ИНСАЙДЫ</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <h1 className="text-3xl font-bold italic tracking-tighter uppercase text-white">Главные инсайды</h1>
           <Button 
             onClick={handleUpdateInsides}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
           >
-            <Zap className="mr-2 h-4 w-4" /> ОБНОВИТЬ ИНСАЙДЫ
+            <Zap className="mr-2 h-4 w-4 fill-current" /> ОБНОВИТЬ ИНСАЙДЫ
           </Button>
         </div>
 
-        {/* --- ЗОЛОТОЙ VIP БЛОК --- */}
-        <div className="relative overflow-hidden border-2 border-[#FFD700] rounded-2xl p-6 mb-10 bg-[#1a1a1a] shadow-[0_0_20px_rgba(255,215,0,0.2)]">
+        {/* VIP БЛОК */}
+        <div className="relative overflow-hidden border-2 border-yellow-500 rounded-2xl p-6 mb-10 bg-zinc-900 shadow-2xl">
           <div className="flex justify-between items-center mb-4">
-            <span className="bg-[#FFD700] text-black px-3 py-1 rounded-md font-bold text-xs uppercase tracking-wider">
+            <span className="bg-yellow-500 text-black px-3 py-1 rounded-md font-bold text-xs uppercase">
               🔒 VIP ДОСТУП
             </span>
-            <span className="text-yellow-500/80 text-xs animate-pulse">● LIVE: Эксклюзив</span>
+            <span className="text-yellow-500/80 text-xs animate-pulse font-mono">LIVE: EXCLUSIVE</span>
           </div>
           
-          <h2 className="text-2xl font-black text-white mb-3 uppercase italic">
+          <h2 className="text-2xl font-black text-white mb-3 uppercase italic leading-none">
             СЛИВ: Точный счет матча Лиги Чемпионов 🔥
           </h2>
           
-          <div className="relative">
-            <p className="text-gray-400 text-lg blur-md select-none mb-6">
+          <div className="relative mb-6">
+            <p className="text-zinc-500 text-lg blur-sm select-none">
               По информации от нашего источника в судейском корпусе, сегодня ожидается невероятный сценарий. Основной вратарь получил повреждение на разминке, что гарантирует точный счет 3:1 в пользу...
             </p>
             <div className="absolute inset-0 flex items-center justify-center">
-               <span className="text-white font-bold text-sm bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm">Контент заблокирован</span>
+               <div className="bg-black/60 px-4 py-2 rounded-lg backdrop-blur-md border border-white/10 flex items-center gap-2">
+                 <Lock className="h-4 w-4 text-yellow-500" />
+                 <span className="text-white font-bold text-sm">Контент заблокирован</span>
+               </div>
             </div>
           </div>
 
@@ -70,12 +72,11 @@ const Index = () => {
             href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="block w-full py-4 rounded-xl bg-gradient-to-r from-[#FFD700] via-[#FDB931] to-[#9f7928] text-black text-center font-black text-lg hover:scale-[1.02] transition-transform shadow-lg"
+            className="block w-full py-4 rounded-xl bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-700 text-black text-center font-black text-xl hover:brightness-110 transition-all shadow-xl uppercase"
           >
-            РАЗБЛОКИРОВАТЬ БЕСПЛАТНО
+            Разблокировать за 0₽
           </a>
         </div>
-        {/* --- КОНЕЦ VIP БЛОКА --- */}
 
         <NewsGrid />
       </main>

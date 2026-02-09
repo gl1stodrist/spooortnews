@@ -10,97 +10,93 @@ export default function Index() {
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', fontFamily: '"Inter", -apple-system, sans-serif' }}>
-      
-      {/* HEADER — Один в один как на Lovable */}
-      <header style={{ padding: '24px 0', borderBottom: '1px solid #111', position: 'sticky', top: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(10px)', zIndex: 50 }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <b style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-1.5px', textTransform: 'uppercase' }}>
-            SPOOORT<span style={{ color: '#ea384c' }}>NEWS</span>
-          </b>
-          <nav style={{ display: 'flex', gap: '30px', fontSize: '13px', fontWeight: '700', letterSpacing: '0.5px' }}>
-            <span style={{ cursor: 'pointer' }}>ФУТБОЛ</span>
-            <span style={{ color: '#ea384c', cursor: 'pointer' }}>LIVE</span>
-          </nav>
+    <div className="lovable-clone">
+      <style>{`
+        .lovable-clone { background: #000; color: #fff; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .wrapper { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        header { border-bottom: 1px solid #111; padding: 25px 0; position: sticky; top: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 100; }
+        .logo { font-size: 26px; font-weight: 900; letter-spacing: -1.5px; text-transform: uppercase; }
+        .red { color: #ea384c; }
+
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 40px 0 60px; }
+        .live-card { background: #080808; border: 1px solid #1a1a1a; padding: 30px; border-radius: 24px; }
+        .vip-card { background: linear-gradient(180deg, #111, #000); border: 1px solid #FDB931; padding: 30px; border-radius: 24px; text-align: center; }
+        .btn { display: block; background: #FDB931; color: #000; padding: 16px; border-radius: 12px; font-weight: 900; text-decoration: none; margin-top: 20px; }
+
+        .news-item { display: flex; gap: 40px; margin-bottom: 50px; padding-bottom: 40px; border-bottom: 1px solid #111; transition: 0.3s; }
+        .news-item:hover { opacity: 0.8; }
+        .news-img { width: 400px; height: 240px; border-radius: 20px; object-fit: cover; background: #111; flex-shrink: 0; }
+        .news-cat { color: #ea384c; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
+        .news-title { font-size: 32px; font-weight: 800; line-height: 1.2; margin: 0 0 15px 0; color: #fff; }
+        .news-text { color: #666; font-size: 16px; line-height: 1.6; }
+
+        footer { background: #000; border-top: 1px solid #111; padding: 80px 0; margin-top: 80px; }
+        .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 60px; }
+        .footer-about { color: #444; font-size: 15px; line-height: 1.8; }
+        .footer-link { color: #222; font-size: 14px; display: block; margin-bottom: 12px; text-decoration: none; }
+      `}</style>
+
+      <header>
+        <div className="wrapper" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <div className="logo">SPOOORT<span className="red">NEWS</span></div>
+          <div style={{fontSize: '13px', fontWeight: 700, gap: '30px', display: 'flex'}}>
+            <span>ФУТБОЛ</span>
+            <span className="red">LIVE</span>
+          </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-        
-        {/* ВЕРХНИЕ ВИДЖЕТЫ */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '60px' }}>
-          
-          {/* LIVE BOARD */}
-          <div style={{ background: '#080808', padding: '30px', borderRadius: '24px', border: '1px solid #1a1a1a' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-              <div style={{ width: '10px', height: '10px', background: '#ea384c', borderRadius: '50%', boxShadow: '0 0 15px #ea384c' }}></div>
-              <span style={{ fontSize: '12px', fontWeight: '900', color: '#ea384c', letterSpacing: '1px' }}>LIVE MATCH</span>
+      <main className="wrapper">
+        <div className="hero-grid">
+          <div className="live-card">
+            <div style={{display: 'flex', alignItems: 'center', gap: '8px', color: '#ea384c', fontSize: '11px', fontWeight: 900, marginBottom: '20px'}}>
+              <div style={{width: '8px', height: '8px', background: '#ea384c', borderRadius: '50%'}}></div> LIVE
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '18px', fontWeight: '800' }}>Манчестер Сити</span>
-              <span style={{ fontSize: '32px', fontWeight: '900', color: '#fff', background: '#111', padding: '10px 25px', borderRadius: '15px', border: '1px solid #222' }}>2 : 1</span>
-              <span style={{ fontSize: '18px', fontWeight: '800', textAlign: 'right' }}>Арсенал</span>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+              <span style={{fontSize: '18px', fontWeight: 800}}>Ман Сити</span>
+              <span style={{fontSize: '32px', fontWeight: 900, background: '#111', padding: '10px 20px', borderRadius: '15px'}}>2 : 1</span>
+              <span style={{fontSize: '18px', fontWeight: 800}}>Арсенал</span>
             </div>
           </div>
-
-          {/* VIP INSIDER */}
-          <div style={{ background: 'linear-gradient(180deg, #111 0%, #000 100%)', border: '1px solid #FDB931', padding: '30px', borderRadius: '24px', textAlign: 'center' }}>
-            <div style={{ color: '#FDB931', fontSize: '12px', fontWeight: '900', marginBottom: '15px', letterSpacing: '2px' }}>🔒 VIP ACCESS</div>
-            <div style={{ fontSize: '22px', fontWeight: '900', marginBottom: '20px' }}>ТОЧНЫЙ СЧЕТ НАЙДЕН</div>
-            <a href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" target="_blank" style={{ 
-              display: 'block', background: '#FDB931', color: '#000', padding: '16px', borderRadius: '12px', fontWeight: '900', textDecoration: 'none', fontSize: '14px' 
-            }}>ПОЛУЧИТЬ ДОСТУП</a>
+          <div className="vip-card">
+            <div style={{color: '#FDB931', fontSize: '11px', fontWeight: 900, letterSpacing: '2px'}}>🔒 VIP ACCESS</div>
+            <div style={{fontSize: '22px', fontWeight: 900, marginTop: '10px'}}>ТОЧНЫЙ СЧЕТ НАЙДЕН</div>
+            <a href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" target="_blank" className="btn">ОТКРЫТЬ ДОСТУП</a>
           </div>
         </div>
 
-        {/* НОВОСТНАЯ ЛЕНТА — Lovable Football Category Style */}
-        <h2 style={{ fontSize: '32px', fontWeight: '900', marginBottom: '40px', letterSpacing: '-1px' }}>Главные события</h2>
-        
-        <div style={{ display: 'grid', gap: '48px' }}>
-          {posts.map((p: any) => (
-            <div key={p.id} style={{ display: 'flex', gap: '40px', alignItems: 'flex-start', borderBottom: '1px solid #111', paddingBottom: '40px' }}>
-              {p.image_url && (
-                <div style={{ flexShrink: 0 }}>
-                  <img src={p.image_url} style={{ width: '320px', height: '200px', borderRadius: '20px', objectFit: 'cover' }} alt="" />
-                </div>
-              )}
-              <div style={{ flex: 1 }}>
-                <div style={{ color: '#ea384c', fontSize: '12px', fontWeight: '800', marginBottom: '12px', textTransform: 'uppercase' }}>Футбол</div>
-                <h3 style={{ fontSize: '28px', fontWeight: '800', margin: '0 0 16px 0', lineHeight: '1.2', color: '#fff' }}>{p.title}</h3>
-                <p style={{ color: '#888', fontSize: '16px', lineHeight: '1.6', margin: 0 }}>{p.excerpt}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <h2 style={{fontSize: '40px', fontWeight: 900, marginBottom: '40px', letterSpacing: '-1.5px'}}>Football</h2>
 
+        {posts.map((p: any) => (
+          <div key={p.id} className="news-item">
+            {p.image_url && <img src={p.image_url} className="news-img" />}
+            <div>
+              <div className="news-cat">Football</div>
+              <h3 className="news-title">{p.title}</h3>
+              <p className="news-text">{p.excerpt}</p>
+            </div>
+          </div>
+        ))}
       </main>
 
-      {/* FOOTER — О нас в стиле Lovable */}
-      <footer style={{ background: '#050505', padding: '80px 20px', borderTop: '1px solid #111', marginTop: '80px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '60px' }}>
+      <footer>
+        <div className="wrapper footer-grid">
           <div>
-            <div style={{ fontWeight: '900', fontSize: '24px', marginBottom: '25px' }}>SPOOORT<span style={{ color: '#ea384c' }}>NEWS</span></div>
-            <p style={{ color: '#555', fontSize: '15px', lineHeight: '1.8' }}>
-              Мы — команда футбольных экспертов и инсайдеров. Наша цель — предоставлять самую оперативную и точную информацию из мира спорта 24/7. Мы не просто пишем новости, мы живем игрой.
-            </p>
+            <div className="logo" style={{marginBottom: '20px', fontSize: '20px'}}>SPOOORT<span className="red">NEWS</span></div>
+            <p className="footer-about">Мы — ваше главное окно в мир футбола. Самые быстрые новости, проверенные инсайды и аналитика, которой доверяют профессионалы.</p>
           </div>
           <div>
-            <div style={{ fontWeight: '800', fontSize: '14px', marginBottom: '25px', color: '#fff', textTransform: 'uppercase' }}>Информация</div>
-            <div style={{ color: '#444', fontSize: '15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <span>О проекте</span>
-              <span>Редакция</span>
-              <span>Контакты</span>
-              <span>Реклама</span>
-            </div>
+            <div style={{fontWeight: 800, fontSize: '13px', marginBottom: '20px'}}>NAVIGATE</div>
+            <div className="footer-link">Главные новости</div>
+            <div className="footer-link">Трансферы</div>
+            <div className="footer-link">Аналитика</div>
           </div>
           <div>
-            <div style={{ fontWeight: '800', fontSize: '14px', marginBottom: '25px', color: '#fff', textTransform: 'uppercase' }}>Категории</div>
-            <div style={{ color: '#444', fontSize: '15px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              <span>Европейский футбол</span>
-              <span>Трансферные инсайды</span>
-              <span>VIP Аналитика</span>
-              <span>Политика конфиденциальности</span>
-            </div>
+            <div style={{fontWeight: 800, fontSize: '13px', marginBottom: '20px'}}>LEGAL</div>
+            <div className="footer-link">Политика конфиденциальности</div>
+            <div className="footer-link">О редакции</div>
+            <div className="footer-link">Контакты</div>
           </div>
         </div>
       </footer>

@@ -1,107 +1,45 @@
-import { useState, useMemo, useCallback } from "react";
-import { Layout } from "@/components/Layout";
-import { SEO } from "@/components/SEO";
-import { Sidebar } from "@/components/Sidebar";
-import { HeroSection } from "@/components/home/HeroSection";
-import { CategoryBar } from "@/components/home/CategoryBar";
-import { NewsFeed } from "@/components/home/NewsFeed";
-import { SportsSections } from "@/components/home/SportsSections";
-import { useAllNews } from "@/hooks/useNews";
-import { mockNews } from "@/data/newsData";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-
-const PAGE_SIZE_INCREMENT = 10;
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 const Index = () => {
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_INCREMENT);
-  const { data: news = [], isLoading, refetch } = useAllNews(pageSize);
-  const [isParsing, setIsParsing] = useState(false);
-  const { toast } = useToast();
+  const [posts, setPosts] = useState<any[]>([]);
 
-  const displayNews = useMemo(
-    () => (news.length > 0 ? news : mockNews),
-    [news]
-  );
+  const fetchPosts = async () => {
+    const { data } = await supabase
+      .from("posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setPosts(data || []);
+  };
 
-  const featuredNews = useMemo(() => displayNews[0] ?? null, [displayNews]);
-  const latestNews = useMemo(() => displayNews.slice(1, 5), [displayNews]);
-  const moreNews = useMemo(() => displayNews.slice(5), [displayNews]);
-  const isEmpty = !isLoading && displayNews.length === 0;
-  const hasMore = news.length > 0 && news.length >= pageSize;
-
-  const handleLoadMore = useCallback(() => {
-    setPageSize((prev) => prev + PAGE_SIZE_INCREMENT);
-  }, []);
-
-  const handleParseNews = useCallback(async () => {
-    setIsParsing(true);
-    try {
-      // Прямой вызов твоей рабочей функции (игнорируем старый конфиг)
-      const response = await fetch('https://yamtqvmekavsaquossah.supabase.co/functions/v1/smart-api', {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Ошибка при вызове Edge Function');
-
-      toast({
-        title: "Успешно",
-        description: "Новости обновлены! Сейчас данные загрузятся.",
-      });
-
-      // Небольшая задержка перед обновлением списка
-      setTimeout(() => {
-        refetch();
-      }, 1000);
-
-    } catch (err) {
-      console.error("Parse error:", err);
-      toast({
-        title: "Ошибка",
-        description: "Не удалось обновить новости. Проверь логи в Supabase.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsParsing(false);
-    }
-  }, [refetch, toast]);
-
-  const seoTitle = !isLoading && featuredNews ? featuredNews.title : "Главные спортивные новости";
-  const seoDescription = !isLoading && featuredNews ? featuredNews.excerpt : "Оперативное освещение спортивных новостей.";
-  const seoImage = !isLoading && featuredNews ? featuredNews.image : undefined;
+  useEffect(() => { fetchPosts(); }, []);
 
   return (
-    <Layout>
-      <SEO title={seoTitle} description={seoDescription} image={seoImage || undefined} url="/" type="website" />
-      <HeroSection
-        featuredNews={featuredNews}
-        secondaryNews={latestNews.slice(0, 2)}
-        isLoading={isLoading}
-        isParsing={isParsing}
-        onRefresh={handleParseNews}
-      />
-      <CategoryBar />
-      <section className="py-8">
-        <div className="container">
-          <div className="grid gap-8 lg:grid-cols-3">
-            <NewsFeed
-              latestNews={latestNews}
-              moreNews={moreNews}
-              isLoading={isLoading}
-              onLoadMore={handleLoadMore}
-              hasMore={hasMore}
-              isEmpty={isEmpty}
-              onRetry={handleParseNews}
-              isRetrying={isParsing}
-            />
-            <div className="hidden lg:block">
-              <Sidebar />
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-900 text-white p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-3xl font-bold italic">PRO-SPORTS AI</h1>
+          <Button onClick={() => supabase.functions.invoke('smart-api').then(() => fetchPosts())}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Обновить ленту
+          </Button>
         </div>
-      </section>
-      <SportsSections news={displayNews} />
-    </Layout>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {posts.map((post) => (
+            <div key={post.id} className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
+              <img src={post.image_url} className="w-full h-48 object-cover opacity-80" />
+              <div className="p-5">
+                <span className="text-blue-400 text-xs font-bold uppercase tracking-wider">Свежее • {new Date(post.created_at).toLocaleDateString()}</span>
+                <h2 className="text-xl font-bold mt-2 mb-3 leading-tight">{post.title}</h2>
+                <p className="text-slate-400 text-sm line-clamp-3">{post.excerpt}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,35 +1,24 @@
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { NewsGrid } from "@/components/NewsGrid";
-
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 uppercase italic">Инсайды</h1>
-        
-        {/* VIP БЛОК — Сделан максимально просто */}
-        <div className="bg-zinc-900 border-2 border-yellow-600 rounded-xl p-6 mb-10 text-center shadow-lg">
-          <p className="text-yellow-600 font-bold text-xs mb-2">🔒 VIP CONTENT</p>
-          <h2 className="text-xl font-black text-white mb-4">ТОЧНЫЙ СЧЕТ МАТЧА 🔥</h2>
-          <div className="bg-black/20 p-4 rounded-md mb-4">
-             <p className="text-gray-500 blur-[3px] select-none text-sm">
-               Скрытая информация о расстановке игроков и результате встречи только для наших партнеров...
-             </p>
-          </div>
-          <a 
-            href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" 
-            target="_blank" 
-            className="inline-block w-full py-3 bg-yellow-600 text-black font-bold rounded-lg uppercase text-sm hover:bg-yellow-500 transition-colors"
-          >
-            Открыть доступ бесплатно
-          </a>
-        </div>
+    <div style={{ backgroundColor: '#000', color: '#fff', minHeight: '100vh', padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1 style={{ textAlign: 'center', fontSize: '30px', fontWeight: 'bold' }}>SPOOORT.RU</h1>
+      
+      <div style={{
+        border: '2px solid gold',
+        padding: '20px',
+        borderRadius: '15px',
+        marginTop: '30px',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ color: 'gold' }}>🔒 VIP ИНСАЙД</h2>
+        <p style={{ filter: 'blur(5px)' }}>Здесь очень секретный текст про точный счет матча...</p>
+        <a href="https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=site_vip" 
+           style={{ background: 'gold', color: 'black', padding: '10px 20px', borderRadius: '5px', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block', marginTop: '10px' }}>
+          ОТКРЫТЬ ДОСТУП
+        </a>
+      </div>
 
-        <NewsGrid />
-      </main>
-      <Footer />
+      <p style={{ marginTop: '50px', textAlign: 'center', color: '#666' }}>Новости загружаются...</p>
     </div>
   );
 };

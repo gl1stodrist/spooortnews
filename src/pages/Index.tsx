@@ -40,7 +40,7 @@ const Index = () => {
         <section className="mb-16">
           <div className="grid lg:grid-cols-12 gap-4">
             
-            {/* ГЛАВНЫЙ ПРОГНОЗ (ДИНАМИЧЕСКИЙ) */}
+            {/* ГЛАВНЫЙ ПРОГНОЗ */}
             <div className="lg:col-span-9 bg-zinc-950 border border-white/5 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8 opacity-10 font-black text-8xl italic select-none">DATA</div>
               
@@ -80,7 +80,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* БОКОВАЯ ЛЕНТА LIVE-ИНСАЙДОВ */}
+            {/* БОКОВАЯ ЛЕНТА */}
             <div className="lg:col-span-3 space-y-4">
               <div className="bg-zinc-950 border border-white/5 rounded-[2rem] p-6 h-full flex flex-col">
                 <div className="text-[9px] font-black uppercase text-zinc-600 mb-6 tracking-widest">Flash Feed</div>
@@ -111,7 +111,7 @@ const Index = () => {
 
         <div className="grid md:grid-cols-3 gap-8">
           {posts.map((p) => (
-            <div key={p.id} className="group">
+            <div key={p.id} className="group cursor-pointer">
               <div className="aspect-[4/5] overflow-hidden rounded-[2.5rem] bg-zinc-900 mb-6 relative border border-white/5">
                 {p.image_url && <img src={p.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-70 group-hover:opacity-100" />}
                 <div className="absolute inset-0 p-8 flex flex-col justify-end bg-gradient-to-t from-black via-black/20 to-transparent">

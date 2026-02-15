@@ -27,14 +27,6 @@
     --input: 0 0% 20%;
     --ring: 0 85% 55%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 0 85% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 0 85% 55%;
 
     /* Custom tokens */
     --sport-red: 0 85% 55%;
@@ -111,7 +103,6 @@
     @apply w-2 h-2 rounded-full bg-primary animate-pulse;
   }
 
-  /* Сетка для карточек */
   .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -119,7 +110,6 @@
     padding: 20px;
   }
 
-  /* Сама карточка */
   .news-card {
     background: #1a1a1a;
     border: 1px solid #333;
@@ -151,7 +141,6 @@
     color: #fff;
   }
 
-  /* Модальное окно (всплывающее) */
   .modal {
     display: none;
     position: fixed;

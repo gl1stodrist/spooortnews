@@ -115,7 +115,7 @@ function Home() {
   )
 }
 
-// Детальная страница прогноза (вставлена прямо сюда)
+// Детальная страница прогноза
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -234,11 +234,11 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/football" element={<SportPage />} />
-        <Route path="/cybersport" element={<SportPage />} />
-        <Route path="/hockey" element={<SportPage />} />
-        <Route path="/basketball" element={<SportPage />} />
-        <Route path="/prognoz/:id" element={<PrognozPage />} /> {/* ← здесь детальная страница */}
+        <Route path="/football" element={<div className="min-h-screen pt-24 flex items-center justify-center text-5xl text-yellow-400 bg-black">Футбол — прогнозы скоро добавятся!</div>} />
+        <Route path="/cybersport" element={<div className="min-h-screen pt-24 flex items-center justify-center text-5xl text-yellow-400 bg-black">Киберспорт — прогнозы скоро добавятся!</div>} />
+        <Route path="/hockey" element={<div className="min-h-screen pt-24 flex items-center justify-center text-5xl text-yellow-400 bg-black">Хоккей — прогнозы скоро добавятся!</div>} />
+        <Route path="/basketball" element={<div className="min-h-screen pt-24 flex items-center justify-center text-5xl text-yellow-400 bg-black">Баскетбол — прогнозы скоро добавятся!</div>} />
+        <Route path="/prognoz/:id" element={<PrognozPage />} />
       </Routes>
     </div>
   )

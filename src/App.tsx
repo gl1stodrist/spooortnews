@@ -10,6 +10,8 @@ const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
 export default function App() {
   const [posts, setPosts] = useState<any[]>([])
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([])
+  const [selectedSport, setSelectedSport] = useState('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -21,12 +23,25 @@ export default function App() {
         .order('created_at', { ascending: false })
         .limit(12)
 
-      if (error) console.error('Ошибка загрузки:', error)
-      else setPosts(data || [])
+      if (error) {
+        console.error('Ошибка загрузки:', error)
+      } else {
+        setPosts(data || [])
+        setFilteredPosts(data || [])
+      }
       setLoading(false)
     }
     fetchPosts()
   }, [])
+
+  // Фильтрация при смене вида спорта
+  useEffect(() => {
+    if (selectedSport === 'all') {
+      setFilteredPosts(posts)
+    } else {
+      setFilteredPosts(posts.filter(post => post.sport === selectedSport))
+    }
+  }, [selectedSport, posts])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white">
@@ -40,7 +55,7 @@ export default function App() {
         <h1 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
           ПРОГНОЗЫ С ПРИБЫЛЬЮ
         </h1>
-        <p className="text-2xl mb-8">Точные ИИ-прогнозы + бонус 15 000 ₽ в Winline</p>
+        <p className="text-2xl mb-8">Точные прогнозы + бонус 15 000 ₽ в Winline</p>
         <Button size="lg" className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:scale-105 transition-all" asChild>
           <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">
             ЗАБРАТЬ БОНУС 15 000 ₽ →
@@ -49,21 +64,44 @@ export default function App() {
         <p className="mt-6 text-lg text-gray-400">Revshare 20% — зарабатывай на каждом игроке</p>
       </motion.section>
 
-      {/* Прогнозы */}
-      <section className="container mx-auto px-6 py-16">
+      {/* Фильтры по видам спорта */}
+      <section className="container mx-auto px-6 py-8">
+        <div className="flex flex-wrap gap-3 justify-center mb-10">
+          {[
+            { value: 'all', label: 'Все' },
+            { value: 'soccer', label: '⚽ Футбол' },
+            { value: 'cs2', label: '🔫 Киберспорт' },
+            { value: 'hockey', label: '🏒 Хоккей' },
+            { value: 'basketball', label: '🏀 Баскетбол' }
+          ].map(item => (
+            <button
+              key={item.value}
+              onClick={() => setSelectedSport(item.value)}
+              className={`px-6 py-3 rounded-full font-medium transition-all text-lg ${
+                selectedSport === item.value
+                  ? 'bg-yellow-500 text-black shadow-lg scale-105'
+                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Прогнозы */}
         <h2 className="text-4xl md:text-6xl font-black text-center mb-12 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          СВЕЖИЕ ПРОГНОЗЫ С ЛУЧШИМИ КЭФАМИ
+          СВЕЖИЕ ПРОГНОЗЫ
         </h2>
 
         {loading ? (
           <div className="text-center py-32 text-2xl">Загрузка...</div>
-        ) : posts.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <div className="text-center py-32 text-2xl text-gray-400">
-            Пока нет прогнозов — бот скоро добавит!
+            Нет прогнозов по этому виду спорта — бот скоро добавит!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {posts.map((post, index) => (
+            {filteredPosts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 40 }}
@@ -99,7 +137,7 @@ export default function App() {
                     <CardContent>
                       <div className="text-gray-300 line-clamp-4 mb-6" dangerouslySetInnerHTML={{ __html: post.content.slice(0, 300) + '...' }} />
                       <p className="text-sm text-gray-500 mb-6">
-                        {new Date(post.created_at).toLocaleString('ru-RU')}
+                        {new Date(post.created_at).toLocaleString('ru-RU')} • {post.sport?.toUpperCase()}
                       </p>
                       <Button className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold transition-colors">
                         СТАВКА В WINLINE

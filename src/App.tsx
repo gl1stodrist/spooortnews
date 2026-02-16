@@ -70,7 +70,7 @@ function Home() {
           {[
             { value: 'all', label: 'Все' },
             { value: 'soccer', label: '⚽ Футбол' },
-            { value: 'cs2', label: '🎮 Киберспорт' },  // ← заменили на геймпад
+            { value: 'cs2', label: '🎮 Киберспорт' },
             { value: 'hockey', label: '🏒 Хоккей' },
             { value: 'basketball', label: '🏀 Баскетбол' }
           ].map(item => (
@@ -88,7 +88,7 @@ function Home() {
           ))}
         </div>
 
-        {/* Прогнозы */}
+        {/* УЛУЧШЕННЫЕ КАРТОЧКИ С HOVER */}
         <h2 className="text-4xl md:text-6xl font-black text-center mb-12 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
           СВЕЖИЕ ПРОГНОЗЫ
         </h2>
@@ -107,37 +107,55 @@ function Home() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                whileHover={{ y: -12, scale: 1.04, transition: { duration: 0.3 } }}
+                className="group relative"
               >
                 <Link to={`/prognoz/${post.id}`} className="block no-underline">
-                  <Card className="bg-gray-900/80 border-gray-700 hover:border-yellow-500 transition-all duration-300 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-yellow-500/20 h-full">
-                    <div className="relative h-56 overflow-hidden">
+                  <Card className="bg-gradient-to-br from-gray-900 to-gray-800 border-gray-700 group-hover:border-yellow-500 transition-all duration-300 rounded-2xl overflow-hidden shadow-xl group-hover:shadow-2xl group-hover:shadow-yellow-500/30 h-full relative">
+                    {/* Бейдж вида спорта */}
+                    <div className="absolute top-4 left-4 bg-black/70 px-4 py-1 rounded-full text-sm font-bold text-yellow-400 z-10">
+                      {post.sport === 'soccer' ? '⚽ Футбол' :
+                       post.sport === 'cs2' ? '🎮 Киберспорт' :
+                       post.sport === 'hockey' ? '🏒 Хоккей' :
+                       post.sport === 'basketball' ? '🏀 Баскетбол' : post.sport?.toUpperCase()}
+                    </div>
+
+                    {/* Коэффициент */}
+                    <div className="absolute top-4 right-4 bg-yellow-500/90 text-black px-4 py-1 rounded-full text-sm font-bold z-10 shadow-md">
+                      {post.content.match(/(\d+\.\d+)/)?.[0] || 'Кэф'}
+                    </div>
+
+                    <div className="relative h-64 overflow-hidden">
                       <img
                         src={post.image_url || 'https://via.placeholder.com/600x400?text=Match'}
                         alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute top-4 left-4 flex gap-3">
-                        <img
+                        <motion.img
+                          whileHover={{ scale: 1.2 }}
                           src={post.team_logo1 || DEFAULT_LOGO}
                           alt="Team 1"
-                          className="w-14 h-14 rounded-full border-3 border-yellow-500 shadow-md"
+                          className="w-16 h-16 rounded-full border-4 border-yellow-500 shadow-lg transition-transform duration-300"
                         />
-                        <img
+                        <motion.img
+                          whileHover={{ scale: 1.2 }}
                           src={post.team_logo2 || DEFAULT_LOGO}
                           alt="Team 2"
-                          className="w-14 h-14 rounded-full border-3 border-yellow-500 shadow-md"
+                          className="w-16 h-16 rounded-full border-4 border-yellow-500 shadow-lg transition-transform duration-300"
                         />
                       </div>
                     </div>
-                    <CardHeader className="pb-4">
+                    <CardHeader className="pb-3">
                       <CardTitle className="text-xl font-bold line-clamp-2 text-white group-hover:text-yellow-400 transition-colors">
                         {post.title}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-gray-300 line-clamp-4 mb-6" dangerouslySetInnerHTML={{ __html: post.content.slice(0, 300) + '...' }} />
-                      <p className="text-sm text-gray-500 mb-6">
-                        {new Date(post.created_at).toLocaleString('ru-RU')} • {post.sport?.toUpperCase()}
+                      <div className="text-gray-300 line-clamp-4 mb-6 text-sm" dangerouslySetInnerHTML={{ __html: post.content.slice(0, 250) + '...' }} />
+                      <p className="text-xs text-gray-500 mb-4">
+                        {new Date(post.created_at).toLocaleString('ru-RU')}
                       </p>
                       <Button className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold transition-colors">
                         СТАВКА В WINLINE
@@ -154,7 +172,7 @@ function Home() {
   )
 }
 
-// Детальная страница прогноза
+// Детальная страница прогноза (оставляем как есть)
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -196,7 +214,6 @@ function PrognozPage() {
           {new Date(post.created_at).toLocaleString('ru-RU')} • {post.sport?.toUpperCase()}
         </div>
 
-        {/* Фото матча */}
         <motion.img
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -205,7 +222,6 @@ function PrognozPage() {
           className="w-full rounded-2xl shadow-2xl mb-12 object-cover max-h-[500px]"
         />
 
-        {/* Логотипы команд */}
         <div className="flex justify-center gap-16 mb-12 flex-wrap">
           <div className="text-center">
             <img src={post.team_logo1 || DEFAULT_LOGO} alt="Команда 1" className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-yellow-500 shadow-lg mb-4" />
@@ -218,7 +234,6 @@ function PrognozPage() {
           </div>
         </div>
 
-        {/* Лонгрид-контент */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -227,7 +242,6 @@ function PrognozPage() {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
-        {/* CTA */}
         <div className="text-center mt-16">
           <Button size="lg" className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:scale-105 transition-all" asChild>
             <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">

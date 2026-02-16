@@ -3,15 +3,14 @@ import { supabase } from './lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, Routes, Route, useLocation } from 'react-router-dom'
+import SportPage from './pages/SportPage' // новый компонент
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://твоя_ссылка_winline'
 const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
-export default function App() {
+function Home() {
   const [posts, setPosts] = useState<any[]>([])
-  const [filteredPosts, setFilteredPosts] = useState<any[]>([])
-  const [selectedSport, setSelectedSport] = useState('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -23,25 +22,12 @@ export default function App() {
         .order('created_at', { ascending: false })
         .limit(12)
 
-      if (error) {
-        console.error('Ошибка загрузки:', error)
-      } else {
-        setPosts(data || [])
-        setFilteredPosts(data || [])
-      }
+      if (error) console.error('Ошибка:', error)
+      else setPosts(data || [])
       setLoading(false)
     }
     fetchPosts()
   }, [])
-
-  // Фильтрация при смене вида спорта
-  useEffect(() => {
-    if (selectedSport === 'all') {
-      setFilteredPosts(posts)
-    } else {
-      setFilteredPosts(posts.filter(post => post.sport === selectedSport))
-    }
-  }, [selectedSport, posts])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white">
@@ -64,44 +50,20 @@ export default function App() {
         <p className="mt-6 text-lg text-gray-400">Revshare 20% — зарабатывай на каждом игроке</p>
       </motion.section>
 
-      {/* Фильтры по видам спорта */}
-      <section className="container mx-auto px-6 py-8">
-        <div className="flex flex-wrap gap-3 justify-center mb-10">
-          {[
-            { value: 'all', label: 'Все' },
-            { value: 'soccer', label: '⚽ Футбол' },
-            { value: 'cs2', label: '🔫 Киберспорт' },
-            { value: 'hockey', label: '🏒 Хоккей' },
-            { value: 'basketball', label: '🏀 Баскетбол' }
-          ].map(item => (
-            <button
-              key={item.value}
-              onClick={() => setSelectedSport(item.value)}
-              className={`px-6 py-3 rounded-full font-medium transition-all text-lg ${
-                selectedSport === item.value
-                  ? 'bg-yellow-500 text-black shadow-lg scale-105'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Прогнозы */}
+      {/* Прогнозы */}
+      <section className="container mx-auto px-6 py-16">
         <h2 className="text-4xl md:text-6xl font-black text-center mb-12 bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
-          СВЕЖИЕ ПРОГНОЗЫ
+          СВЕЖИЕ ПРОГНОЗЫ С ЛУЧШИМИ КЭФАМИ
         </h2>
-
         {loading ? (
           <div className="text-center py-32 text-2xl">Загрузка...</div>
-        ) : filteredPosts.length === 0 ? (
+        ) : posts.length === 0 ? (
           <div className="text-center py-32 text-2xl text-gray-400">
-            Нет прогнозов по этому виду спорта — бот скоро добавит!
+            Пока нет прогнозов — бот скоро добавит!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredPosts.map((post, index) => (
+            {posts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, y: 40 }}
@@ -137,7 +99,7 @@ export default function App() {
                     <CardContent>
                       <div className="text-gray-300 line-clamp-4 mb-6" dangerouslySetInnerHTML={{ __html: post.content.slice(0, 300) + '...' }} />
                       <p className="text-sm text-gray-500 mb-6">
-                        {new Date(post.created_at).toLocaleString('ru-RU')} • {post.sport?.toUpperCase()}
+                        {new Date(post.created_at).toLocaleString('ru-RU')}
                       </p>
                       <Button className="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-bold transition-colors">
                         СТАВКА В WINLINE
@@ -150,6 +112,49 @@ export default function App() {
           </div>
         )}
       </section>
+    </div>
+  )
+}
+
+export default function App() {
+  const location = useLocation()
+
+  return (
+    <div>
+      {/* Навигация */}
+      <nav className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-gray-800">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <Link to="/" className="text-2xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            PRO-SPORTS
+          </Link>
+          <div className="flex gap-6">
+            <Link to="/" className={`text-lg font-medium ${location.pathname === '/' ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}>
+              Главная
+            </Link>
+            <Link to="/football" className={`text-lg font-medium ${location.pathname === '/football' ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}>
+              Футбол
+            </Link>
+            <Link to="/cybersport" className={`text-lg font-medium ${location.pathname === '/cybersport' ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}>
+              Киберспорт
+            </Link>
+            <Link to="/hockey" className={`text-lg font-medium ${location.pathname === '/hockey' ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}>
+              Хоккей
+            </Link>
+            <Link to="/basketball" className={`text-lg font-medium ${location.pathname === '/basketball' ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-400'}`}>
+              Баскетбол
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/football" element={<SportPage />} />
+        <Route path="/cybersport" element={<SportPage />} />
+        <Route path="/hockey" element={<SportPage />} />
+        <Route path="/basketball" element={<SportPage />} />
+        <Route path="/prognoz/:id" element={<div>Детальная страница прогноза (уже есть)</div>} />
+      </Routes>
     </div>
   )
 }

@@ -42,38 +42,43 @@ function Home() {
   }, [selectedSport, posts])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#0b0b0f] text-white relative overflow-hidden">
       {/* Лёгкий красный градиент на фоне */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0000]/30 via-transparent to-[#0a0000]/20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#200000]/20 via-transparent to-[#0a0000]/10 pointer-events-none" />
 
       {/* Баннер */}
       <motion.section
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative py-24 md:py-32 bg-gradient-to-b from-[#1a0000] to-transparent text-center"
+        className="relative py-24 md:py-32 bg-gradient-to-b from-[#1a0000]/80 to-transparent text-center"
       >
-        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
+        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,0,51,0.4)]">
           ПРОГНОЗЫ С ПРИБЫЛЬЮ
         </h1>
         <p className="text-xl md:text-2xl mb-10 text-gray-300">
           Точные прогнозы + бонус 15 000 ₽ в Winline
         </p>
-        <Button
-          size="lg"
-          className="bg-red-700 hover:bg-red-600 text-white font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:shadow-red-500/50 transition-all hover:scale-105 border-2 border-red-500/70"
-          asChild
+        <motion.div
+          animate={{ scale: [1, 1.03, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">
-            ЗАБРАТЬ БОНУС 15 000 ₽ →
-          </a>
-        </Button>
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:shadow-red-500/60 transition-all hover:scale-105 border-2 border-red-500/70"
+            asChild
+          >
+            <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">
+              ЗАБРАТЬ БОНУС 15 000 ₽ →
+            </a>
+          </Button>
+        </motion.div>
         <p className="mt-8 text-lg text-gray-500">
           Revshare 20% — зарабатывай на каждом игроке
         </p>
       </motion.section>
 
-      {/* Фильтры — красные контуры + символы */}
+      {/* Фильтры — красные контуры */}
       <section className="container mx-auto px-6 py-12">
         <div className="flex flex-wrap gap-4 justify-center mb-16">
           {[
@@ -102,7 +107,7 @@ function Home() {
           ))}
         </div>
 
-        {/* Заголовок */}
+        {/* Прогнозы */}
         <h2 className="text-5xl md:text-6xl font-black text-center mb-16 bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
           СВЕЖИЕ ПРОГНОЗЫ
         </h2>
@@ -132,6 +137,11 @@ function Home() {
                        post.sport === 'cs2' ? '🎮 Киберспорт' :
                        post.sport === 'hockey' ? '🏒 Хоккей' :
                        post.sport === 'basketball' ? '🏀 Баскетбол' : post.sport?.toUpperCase()}
+                    </div>
+
+                    {/* Коэффициент */}
+                    <div className="absolute top-4 right-4 bg-red-600/90 text-white px-4 py-1 rounded-full text-sm font-bold z-10 shadow-md">
+                      {post.content.match(/(\d+\.\d+)/)?.[0] || 'Кэф'}
                     </div>
 
                     <div className="relative h-64 overflow-hidden">
@@ -183,7 +193,7 @@ function Home() {
   )
 }
 
-// Детальная страница (оставляем как была)
+// Детальная страница (обновлённая под новый стиль)
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -211,12 +221,14 @@ function PrognozPage() {
   if (!post) return <div className="min-h-screen flex items-center justify-center text-2xl text-red-500">Прогноз не найден</div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 to-black text-white pt-20">
+    <div className="min-h-screen bg-gradient-to-b from-[#0b0b0f] to-black text-white pt-20 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#200000]/10 via-transparent to-[#0a0000]/10 pointer-events-none" />
+
       <div className="container mx-auto px-6 py-12 max-w-5xl">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-6xl font-black text-center mb-8 bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent"
+          className="text-4xl md:text-6xl font-black text-center mb-8 bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,0,51,0.3)]"
         >
           {post.title}
         </motion.h1>
@@ -230,7 +242,7 @@ function PrognozPage() {
           animate={{ opacity: 1, scale: 1 }}
           src={post.image_url || 'https://via.placeholder.com/1200x600?text=Match'}
           alt={post.title}
-          className="w-full rounded-2xl shadow-2xl mb-12 object-cover max-h-[500px] border border-red-900/30"
+          className="w-full rounded-2xl shadow-2xl mb-12 object-cover max-h-[500px] border-2 border-red-900/40"
         />
 
         <div className="flex justify-center gap-16 mb-12 flex-wrap">
@@ -249,12 +261,12 @@ function PrognozPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="prose prose-invert prose-lg max-w-none mb-16 border-l-4 border-red-600 pl-6"
+          className="prose prose-invert prose-lg max-w-none mb-16 border-l-4 border-red-600 pl-6 bg-black/30 p-6 rounded-xl"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
         <div className="text-center mt-16">
-          <Button size="lg" className="bg-red-700 hover:bg-red-600 text-white font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:shadow-red-500/50 transition-all border-2 border-red-500/70 hover:border-red-400" asChild>
+          <Button size="lg" className="bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white font-bold px-12 py-8 text-2xl rounded-xl shadow-2xl hover:shadow-red-500/60 transition-all border-2 border-red-500/70 hover:border-red-400" asChild>
             <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">
               СДЕЛАТЬ СТАВКУ В WINLINE → БОНУС 15 000 ₽
             </a>

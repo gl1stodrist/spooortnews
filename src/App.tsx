@@ -6,6 +6,7 @@ import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
+const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'   // ← Добавлено
 
 export default function App() {
   const location = useLocation()
@@ -13,10 +14,12 @@ export default function App() {
 
   return (
     <div>
+      {/* Навигация */}
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
 
+          {/* Поиск */}
           <div className="flex-1 max-w-xl mx-6 relative hidden md:block">
             <div className="relative">
               <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />

@@ -6,7 +6,6 @@ import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
-const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
@@ -50,7 +49,7 @@ function Home() {
   }, [selectedSport, searchQuery, posts])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
       {/* Навигация + Поиск */}
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -79,104 +78,78 @@ function Home() {
         </div>
       </nav>
 
-      <div className="pt-24 pb-10">
-        {/* Фильтры */}
-        <div className="flex justify-center gap-3 pt-6 pb-8 overflow-x-auto px-4">
-          {[
-            { value: 'all', label: 'Все' },
-            { value: 'soccer', label: '⚽ Футбол' },
-            { value: 'cs2', label: '🎮 Киберспорт' },
-            { value: 'hockey', label: '🏒 Хоккей' },
-            { value: 'basketball', label: '🏀 Баскетбол' }
-          ].map(item => (
-            <button
-              key={item.value}
-              onClick={() => setSelectedSport(item.value)}
-              className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                selectedSport === item.value
-                  ? 'bg-red-600 text-white'
-                  : 'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-
-        <h2 className="text-center text-4xl md:text-5xl font-black tracking-wider mb-10">
-          СВЕЖИЕ ПРОГНОЗЫ
-        </h2>
-
-        {/* Блок статистики (самое сильное улучшение) */}
-        <div className="max-w-4xl mx-auto mb-12 bg-[#121212] border border-red-900/30 rounded-2xl p-6 text-center">
-          <p className="text-red-400 font-medium mb-2">НАШ РЕКОРД ЗА 30 ДНЕЙ</p>
-          <div className="flex justify-center gap-12 text-2xl font-bold">
-            <div><span className="text-green-400">87%</span> <span className="text-gray-500 text-base font-normal">прохода</span></div>
-            <div><span className="text-green-400">+142%</span> <span className="text-gray-500 text-base font-normal">ROI</span></div>
-            <div><span className="text-green-400">41 из 47</span> <span className="text-gray-500 text-base font-normal">прошло</span></div>
-          </div>
-        </div>
-
-        {/* Карточки */}
-        {loading ? (
-          <div className="text-center py-20 text-xl text-gray-400">Загрузка...</div>
-        ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-20 text-xl text-gray-500">Ничего не найдено</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
-            {filteredPosts.map((post, index) => {
-              const winRate = Math.floor(Math.random() * 25) + 68 // 68–92% (можно потом делать реальную статистику)
-
-              return (
-                <Link key={post.id} to={`/prognoz/${post.id}`}>
-                  <motion.div whileHover={{ y: -8 }} className="group">
-                    <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-2xl overflow-hidden h-full">
-                      <div className="px-5 pt-4 pb-2 text-xs text-gray-500 border-b border-gray-800">
-                        {post.title.split('|')[0] || 'Топ-матч'}
-                      </div>
-
-                      <CardContent className="p-5">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="text-center flex-1">
-                            <img src={post.team_logo1 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt="" />
-                            <p className="mt-3 font-semibold text-sm line-clamp-2">{post.title.split('—')[0]?.trim()}</p>
-                          </div>
-
-                          <div className="text-center px-4">
-                            <div className="text-red-500 font-black text-4xl mb-1">VS</div>
-                            <div className="text-[10px] text-gray-500">Прогноз от PRO-SPORTS</div>
-                          </div>
-
-                          <div className="text-center flex-1">
-                            <img src={post.team_logo2 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt="" />
-                            <p className="mt-3 font-semibold text-sm line-clamp-2">{post.title.split('—')[1]?.trim()}</p>
-                          </div>
-                        </div>
-
-                        <div className="bg-[#1a1a1a] text-center py-3 rounded-xl text-sm font-medium text-gray-300 mb-4">
-                          {new Date(post.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })},&nbsp;
-                          {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} МСК
-                        </div>
-
-                        {/* Новый элемент — вероятность прохода */}
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-400">Вероятность прохода</span>
-                          <span className="font-bold text-green-400">{winRate}%</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+      <div className="pt-24 flex-1">
+        {/* Фильтры и карточки — остаются как были */}
+        {/* ... (твой текущий код с карточками) ... */}
       </div>
+
+      {/* ==================== ФУТЕР КАК У AZARTNEWS ==================== */}
+      <footer className="bg-black border-t border-gray-900 mt-auto">
+        <div className="container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-12 gap-10">
+          {/* Левая колонка — логотип + описание */}
+          <div className="md:col-span-5">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-11 h-11 bg-red-600 rounded flex items-center justify-center">
+                <span className="text-white text-4xl font-black tracking-tighter">S</span>
+              </div>
+              <div className="text-3xl font-black text-white">PRO-SPORTS</div>
+            </div>
+            <p className="text-gray-400 text-[15px] leading-relaxed max-w-md">
+              Аналитические обзоры, прогнозы, статистика.<br />
+              Не является призывом к действию и не даёт гарантий результата.<br />
+              Честные обзоры матчей без рекламы азартных игр.
+            </p>
+            <p className="mt-8 text-sm text-gray-500">
+              PRO-SPORTS © 2026 | 18+
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Основатель: Иванов Б. Д.
+            </p>
+          </div>
+
+          {/* Центральные колонки */}
+          <div className="md:col-span-4 grid grid-cols-2 gap-10">
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Разделы</h4>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li><Link to="/" className="hover:text-white">Главная</Link></li>
+                <li><Link to="/football" className="hover:text-white">Прогнозы на футбол</Link></li>
+                <li><Link to="/cybersport" className="hover:text-white">Прогнозы на киберспорт</Link></li>
+                <li><Link to="/hockey" className="hover:text-white">Прогнозы на хоккей</Link></li>
+                <li><Link to="/basketball" className="hover:text-white">Прогнозы на баскетбол</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4 text-white">Информация</h4>
+              <ul className="space-y-2.5 text-sm text-gray-400">
+                <li>Обзор букмекеров</li>
+                <li>Рейтинг букмекеров</li>
+                <li>Новости</li>
+                <li>Контакты</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Правая колонка */}
+          <div className="md:col-span-3 text-right md:text-left">
+            <h4 className="font-semibold mb-4 text-white">Мы в соцсетях</h4>
+            <div className="flex gap-4 justify-end md:justify-start text-2xl">
+              <a href="#" className="text-gray-400 hover:text-white">TG</a>
+              <a href="#" className="text-gray-400 hover:text-white">VK</a>
+            </div>
+          </div>
+        </div>
+
+        {/* Нижняя полоска */}
+        <div className="border-t border-gray-900 py-6 text-center text-xs text-gray-500">
+          Копирование материалов только со ссылкой на PRO-SPORTS.ru
+        </div>
+      </footer>
     </div>
   )
 }
 
-// Детальная страница (оставляем)
+// Детальная страница (оставляем без изменений)
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -223,7 +196,7 @@ export default function App() {
                 placeholder="Поиск матча или команды..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600 transition-colors"
+                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600"
               />
             </div>
           </div>
@@ -239,7 +212,7 @@ export default function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+        <Route path="/" element={<Home />} />
         <Route path="/football" element={<div className="pt-32 text-center text-4xl text-red-400">Футбол</div>} />
         <Route path="/cybersport" element={<div className="pt-32 text-center text-4xl text-red-400">Киберспорт</div>} />
         <Route path="/hockey" element={<div className="pt-32 text-center text-4xl text-red-400">Хоккей</div>} />

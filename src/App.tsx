@@ -21,6 +21,41 @@ type Post = {
   sport: SportFilter;
 };
 
+type Teams = {
+  home: string;
+  away: string;
+};
+
+const parseTeamsFromTitle = (title: string): Teams | null => {
+  const normalizedTitle = (title || "").replace(/\s+/g, " ").trim();
+  if (!normalizedTitle) return null;
+
+  const matchPart = normalizedTitle.split("|")[0].trim();
+  const separators = [/\s+—\s+/i, /\s+-\s+/i, /\s+vs\.?\s+/i, /\s+v\s+/i];
+
+  for (const separator of separators) {
+    const parts = matchPart
+      .split(separator)
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    if (parts.length >= 2) {
+      return { home: parts[0], away: parts[1] };
+    }
+  }
+
+  return null;
+};
+
+const stripHtml = (value: string) =>
+  value
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 const sportOptions: { value: SportFilter; label: string }[] = [
   { value: "all", label: "Все" },
   { value: "soccer", label: "⚽ Футбол" },
@@ -135,6 +170,7 @@ function HomePage({
 
   const highlightedPost = filteredPosts[0];
   const feedPosts = highlightedPost ? filteredPosts.slice(1) : filteredPosts;
+  const highlightedTeams = highlightedPost ? parseTeamsFromTitle(highlightedPost.title) : null;
 
   const getViewsCount = (postId: string | number | null | undefined) => {
     const normalizedId = String(postId ?? "");
@@ -214,7 +250,21 @@ function HomePage({
               <h2 className="text-2xl font-black uppercase leading-tight md:text-3xl">
                 {highlightedPost.title}
               </h2>
-              <p className="mt-4 line-clamp-3 text-zinc-300">{highlightedPost.content}</p>
+
+              {highlightedTeams && (
+                <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-zinc-200">
+                  <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
+                    {highlightedTeams.home}
+                  </span>
+                  <span className="text-red-400">VS</span>
+                  <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
+                    {highlightedTeams.away}
+                  </span>
+                </div>
+              )}
+
+              <p className="mt-4 line-clamp-3 text-zinc-300">{stripHtml(highlightedPost.content)}</p>
+
               <div className="mt-5 flex items-center gap-4 text-sm text-zinc-400">
                 <span className="inline-flex items-center gap-1">
                   <CalendarDays className="h-4 w-4" />
@@ -244,41 +294,60 @@ function HomePage({
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {feedPosts.map((post, index) => (
-              <motion.article
-                key={post.id}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(index * 0.03, 0.3) }}
-                className="group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70"
-              >
-                <Link to={`/prognoz/${post.id}`}>
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={post.image_url || DEFAULT_IMAGE}
-                      alt={post.title}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight group-hover:text-red-300">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{post.content}</p>
-                    <div className="mt-3 flex items-center gap-3 text-xs text-zinc-500">
-                      <span className="inline-flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        {new Date(post.created_at).toLocaleDateString("ru-RU")}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" /> {getViewsCount(post.id)}
-                      </span>
+            {feedPosts.map((post, index) => {
+              const teams = parseTeamsFromTitle(post.title);
+
+              return (
+                <motion.article
+                  key={post.id}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                  className="group overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/70"
+                >
+                  <Link to={`/prognoz/${post.id}`}>
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={post.image_url || DEFAULT_IMAGE}
+                        alt={post.title}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     </div>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
+
+                    <div className="p-4">
+                      <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight group-hover:text-red-300">
+                        {post.title}
+                      </h3>
+
+                      {teams && (
+                        <div className="mt-2 flex items-center gap-2 text-xs font-semibold text-zinc-300">
+                          <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-2 py-1">
+                            {teams.home}
+                          </span>
+                          <span className="text-red-400">VS</span>
+                          <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-2 py-1">
+                            {teams.away}
+                          </span>
+                        </div>
+                      )}
+
+                      <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{stripHtml(post.content)}</p>
+
+                      <div className="mt-3 flex items-center gap-3 text-xs text-zinc-500">
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="h-3.5 w-3.5" />
+                          {new Date(post.created_at).toLocaleDateString("ru-RU")}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Eye className="h-3.5 w-3.5" /> {getViewsCount(post.id)}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.article>
+              );
+            })}
           </div>
         )}
       </section>

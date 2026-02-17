@@ -13,7 +13,7 @@ const DEFAULT_IMAGE = "/placeholder.svg";
 type SportFilter = "all" | "soccer" | "cs2" | "hockey" | "basketball";
 
 type Post = {
-  id: string;
+  id: string | number;
   title: string;
   content: string;
   image_url: string | null;
@@ -136,8 +136,9 @@ function HomePage({
   const highlightedPost = filteredPosts[0];
   const feedPosts = highlightedPost ? filteredPosts.slice(1) : filteredPosts;
 
-  const getViewsCount = (postId: string) => {
-    const seed = postId
+  const getViewsCount = (postId: string | number | null | undefined) => {
+    const normalizedId = String(postId ?? "");
+    const seed = normalizedId
       .split("")
       .reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return 300 + (seed % 2000);
@@ -334,7 +335,7 @@ function PrognozPage() {
         alt={post.title}
         className="mt-6 h-[360px] w-full rounded-3xl object-cover"
       />
-      <div className="prose prose-invert mt-8 max-w-none text-zinc-200 whitespace-pre-wrap">
+      <div className="prose prose-invert mt-8 max-w-none whitespace-pre-wrap text-zinc-200">
         {post.content}
       </div>
     </article>

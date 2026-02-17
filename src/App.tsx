@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
-import { Link, Routes, Route, useLocation } from 'react-router-dom'
+import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
+const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
@@ -40,9 +41,9 @@ function Home() {
   }, [selectedSport, posts])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Фильтры как на azartnews */}
-      <div className="flex justify-center gap-3 pt-8 pb-6 overflow-x-auto px-4">
+    <div className="min-h-screen bg-[#0a0a0a] text-white pb-20">
+      {/* Фильтры */}
+      <div className="flex justify-center gap-3 pt-8 pb-6 overflow-x-auto px-4 scrollbar-hide">
         {[
           { value: 'all', label: 'Все' },
           { value: 'soccer', label: 'Футбол' },
@@ -64,7 +65,6 @@ function Home() {
         ))}
       </div>
 
-      {/* Заголовок */}
       <h2 className="text-center text-4xl md:text-5xl font-black tracking-wider mb-10">
         СВЕЖИЕ ПРОГНОЗЫ
       </h2>
@@ -76,47 +76,47 @@ function Home() {
           {filteredPosts.map(post => (
             <Link key={post.id} to={`/prognoz/${post.id}`}>
               <motion.div whileHover={{ y: -6 }} className="group">
-                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600/50 rounded-2xl overflow-hidden h-full transition-all duration-300">
-                  {/* Лига */}
-                  <div className="px-5 pt-4 text-xs text-gray-500">
-                    {post.title.split('|')[0] || 'Топ-матч'}
+                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-2xl overflow-hidden h-full">
+                  {/* Название лиги */}
+                  <div className="px-5 pt-4 pb-2 text-xs text-gray-500 border-b border-gray-800">
+                    Экстралига (Шахтер Солигорск - Юность Минск)
                   </div>
 
                   <CardContent className="p-5">
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between">
                       {/* Левая команда */}
                       <div className="text-center flex-1">
                         <img 
-                          src={post.team_logo1 || 'https://via.placeholder.com/80?text=Team'} 
-                          className="w-16 h-16 mx-auto rounded-full" 
+                          src={post.team_logo1 || DEFAULT_LOGO} 
+                          className="w-20 h-20 mx-auto rounded-full" 
                           alt="" 
                         />
-                        <p className="mt-3 text-sm font-medium line-clamp-2">
+                        <p className="mt-3 font-semibold text-sm line-clamp-2">
                           {post.title.split('—')[0]?.trim()}
                         </p>
                       </div>
 
-                      {/* VS */}
+                      {/* Центр */}
                       <div className="text-center px-4">
-                        <div className="text-red-500 font-black text-3xl mb-1">VS</div>
+                        <div className="text-red-500 font-black text-4xl mb-1">VS</div>
                         <div className="text-[10px] text-gray-500">Прогноз от PRO-SPORTS</div>
                       </div>
 
                       {/* Правая команда */}
                       <div className="text-center flex-1">
                         <img 
-                          src={post.team_logo2 || 'https://via.placeholder.com/80?text=Team'} 
-                          className="w-16 h-16 mx-auto rounded-full" 
+                          src={post.team_logo2 || DEFAULT_LOGO} 
+                          className="w-20 h-20 mx-auto rounded-full" 
                           alt="" 
                         />
-                        <p className="mt-3 text-sm font-medium line-clamp-2">
+                        <p className="mt-3 font-semibold text-sm line-clamp-2">
                           {post.title.split('—')[1]?.trim()}
                         </p>
                       </div>
                     </div>
 
                     {/* Дата и время */}
-                    <div className="bg-[#1a1a1a] text-center py-3 rounded-xl text-sm text-gray-300 font-medium">
+                    <div className="mt-6 bg-[#1a1a1a] text-center py-3 rounded-xl text-sm font-medium text-gray-300">
                       {new Date(post.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })},&nbsp;
                       {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} МСК
                     </div>
@@ -131,7 +131,7 @@ function Home() {
   )
 }
 
-// Детальная страница (оставляем как была)
+// Детальная страница прогноза
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)

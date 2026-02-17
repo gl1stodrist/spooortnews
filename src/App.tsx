@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 
@@ -42,26 +41,9 @@ function Home() {
   }, [selectedSport, posts])
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white">
-      {/* Баннер */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="py-20 md:py-28 bg-gradient-to-b from-[#1a0000] to-transparent text-center"
-      >
-        <h1 className="text-5xl md:text-7xl font-black mb-6 bg-gradient-to-r from-red-500 to-red-300 bg-clip-text text-transparent">
-          ПРОГНОЗЫ С ПРИБЫЛЬЮ
-        </h1>
-        <p className="text-xl md:text-2xl mb-10 text-gray-300">Точные прогнозы + бонус 15 000 ₽ в Winline</p>
-        <Button size="lg" className="bg-red-600 hover:bg-red-500 text-white font-bold px-12 py-7 text-xl rounded-2xl" asChild>
-          <a href={WINLINE_LINK} target="_blank" rel="noopener noreferrer">
-            ЗАБРАТЬ БОНУС 15 000 ₽ →
-          </a>
-        </Button>
-      </motion.section>
-
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       {/* Фильтры */}
-      <section className="container mx-auto px-6 py-10">
+      <section className="container mx-auto px-6 py-8">
         <div className="flex flex-wrap gap-3 justify-center mb-12">
           {[
             { value: 'all', label: 'Все' },
@@ -73,10 +55,10 @@ function Home() {
             <button
               key={item.value}
               onClick={() => setSelectedSport(item.value)}
-              className={`px-6 py-3 rounded-full font-medium transition-all ${
+              className={`px-6 py-3 rounded-full text-lg font-medium transition-all ${
                 selectedSport === item.value
                   ? 'bg-red-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-900 border border-gray-700 text-gray-300 hover:border-red-600 hover:text-white'
               }`}
             >
               {item.label}
@@ -84,49 +66,73 @@ function Home() {
           ))}
         </div>
 
-        <h2 className="text-4xl md:text-6xl font-black text-center mb-12 text-white">
+        <h2 className="text-5xl font-black text-center mb-12 text-white tracking-tight">
           СВЕЖИЕ ПРОГНОЗЫ
         </h2>
 
         {loading ? (
-          <div className="text-center py-20 text-xl">Загрузка...</div>
+          <div className="text-center py-32 text-2xl text-gray-400">Загрузка...</div>
         ) : filteredPosts.length === 0 ? (
-          <div className="text-center py-20 text-xl text-gray-400">Нет прогнозов</div>
+          <div className="text-center py-32 text-2xl text-gray-500">Нет прогнозов по выбранному виду спорта</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredPosts.map((post, index) => (
               <motion.div
                 key={post.id}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.08 }}
-                whileHover={{ y: -10 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -8 }}
               >
                 <Link to={`/prognoz/${post.id}`} className="block">
-                  <Card className="bg-gray-900 border border-gray-700 hover:border-red-600 transition-all duration-300 rounded-2xl overflow-hidden h-full group">
-                    <div className="relative h-52 overflow-hidden">
-                      <img
-                        src={post.image_url || 'https://via.placeholder.com/600x400?text=Match'}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-4 left-4 flex gap-3">
-                        <img src={post.team_logo1 || DEFAULT_LOGO} alt="" className="w-14 h-14 rounded-full border-2 border-white/80" />
-                        <img src={post.team_logo2 || DEFAULT_LOGO} alt="" className="w-14 h-14 rounded-full border-2 border-white/80" />
-                      </div>
+                  <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-2xl overflow-hidden h-full">
+                    {/* Название лиги */}
+                    <div className="px-5 pt-5 pb-3 text-sm text-gray-400 border-b border-gray-800">
+                      {post.title.split('|')[0] || 'Топ-матч'}
                     </div>
 
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-red-400 transition-colors">
-                        {post.title}
-                      </CardTitle>
-                    </CardHeader>
+                    <CardContent className="p-5">
+                      <div className="flex justify-between items-center mb-6">
+                        {/* Левая команда */}
+                        <div className="text-center flex-1">
+                          <img 
+                            src={post.team_logo1 || DEFAULT_LOGO} 
+                            alt="Team 1" 
+                            className="w-20 h-20 mx-auto rounded-full border border-gray-700" 
+                          />
+                          <p className="mt-3 font-semibold text-sm line-clamp-2">
+                            {post.title.split('—')[0]?.trim()}
+                          </p>
+                        </div>
 
-                    <CardContent className="pt-0">
-                      <div className="text-sm text-gray-400 line-clamp-3 mb-6" dangerouslySetInnerHTML={{ __html: post.content.slice(0, 180) + '...' }} />
-                      <Button className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold">
-                        СДЕЛАТЬ СТАВКУ
-                      </Button>
+                        {/* Центр */}
+                        <div className="text-center px-4">
+                          <div className="text-xs text-gray-500 mb-1">Прогноз от PRO-SPORTS</div>
+                          <div className="text-2xl font-black text-red-500">VS</div>
+                        </div>
+
+                        {/* Правая команда */}
+                        <div className="text-center flex-1">
+                          <img 
+                            src={post.team_logo2 || DEFAULT_LOGO} 
+                            alt="Team 2" 
+                            className="w-20 h-20 mx-auto rounded-full border border-gray-700" 
+                          />
+                          <p className="mt-3 font-semibold text-sm line-clamp-2">
+                            {post.title.split('—')[1]?.trim()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Время матча */}
+                      <div className="bg-[#1a1a1a] text-center py-2.5 rounded-xl text-sm font-medium text-gray-300">
+                        {new Date(post.created_at).toLocaleString('ru-RU', { 
+                          day: '2-digit', 
+                          month: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>
@@ -155,26 +161,14 @@ function PrognozPage() {
     fetchPost()
   }, [id])
 
-  if (loading) return <div className="text-center py-40 text-2xl">Загрузка...</div>
-  if (!post) return <div className="text-center py-40 text-2xl text-red-500">Прогноз не найден</div>
+  if (loading) return <div className="text-center py-40">Загрузка...</div>
+  if (!post) return <div className="text-center py-40 text-red-500">Прогноз не найден</div>
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white pt-20 pb-12">
-      <div className="max-w-4xl mx-auto px-6">
-        <h1 className="text-4xl md:text-6xl font-black text-center mb-8">{post.title}</h1>
-        <div className="text-center text-gray-400 mb-10">
-          {new Date(post.created_at).toLocaleString('ru-RU')} • {post.sport?.toUpperCase()}
-        </div>
-
-        <img src={post.image_url} alt="" className="w-full rounded-2xl mb-12" />
-
+    <div className="min-h-screen bg-[#0b0b0f] text-white pt-20">
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-4xl font-black text-center mb-8">{post.title}</h1>
         <div dangerouslySetInnerHTML={{ __html: post.content }} className="prose prose-invert max-w-none" />
-
-        <div className="text-center mt-16">
-          <Button size="lg" className="bg-red-600 hover:bg-red-500 text-white px-12 py-7 text-xl" asChild>
-            <a href={WINLINE_LINK} target="_blank">СДЕЛАТЬ СТАВКУ</a>
-          </Button>
-        </div>
       </div>
     </div>
   )
@@ -200,10 +194,10 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/football" element={<div className="pt-32 text-center text-4xl">Футбол</div>} />
-        <Route path="/cybersport" element={<div className="pt-32 text-center text-4xl">Киберспорт</div>} />
-        <Route path="/hockey" element={<div className="pt-32 text-center text-4xl">Хоккей</div>} />
-        <Route path="/basketball" element={<div className="pt-32 text-center text-4xl">Баскетбол</div>} />
+        <Route path="/football" element={<div className="pt-32 text-center text-4xl text-red-400">Футбол</div>} />
+        <Route path="/cybersport" element={<div className="pt-32 text-center text-4xl text-red-400">Киберспорт</div>} />
+        <Route path="/hockey" element={<div className="pt-32 text-center text-4xl text-red-400">Хоккей</div>} />
+        <Route path="/basketball" element={<div className="pt-32 text-center text-4xl text-red-400">Баскетбол</div>} />
         <Route path="/prognoz/:id" element={<PrognozPage />} />
       </Routes>
     </div>

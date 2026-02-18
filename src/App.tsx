@@ -13,11 +13,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div>
+      {/* Навигация */}
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
 
+          {/* Поиск */}
           <div className="flex-1 max-w-xl mx-6 relative hidden md:block">
             <div className="relative">
               <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
@@ -49,6 +51,7 @@ export default function App() {
   )
 }
 
+// ==================== ГЛАВНАЯ СТРАНИЦА ====================
 function Home({ searchQuery, setSearchQuery }) {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
@@ -120,14 +123,19 @@ function Home({ searchQuery, setSearchQuery }) {
 
       {loading ? (
         <div className="text-center py-20 text-xl text-gray-400">Загрузка...</div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="text-center py-32 text-xl text-gray-500">
+          Пока нет прогнозов<br />Бот скоро добавит новые
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
           {filteredPosts.map(post => (
             <Link key={post.id} to={`/prognoz/${post.id}`}>
-              <motion.div whileHover={{ y: -6 }} className="group">
-                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-2xl overflow-hidden h-full">
+              <motion.div whileHover={{ y: -10, scale: 1.02 }} className="group">
+                <Card className="bg-gradient-to-br from-[#121212] to-[#0f0f0f] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-3xl overflow-hidden h-full shadow-xl group-hover:shadow-2xl group-hover:shadow-red-900/20">
+                  
                   {/* Название лиги */}
-                  <div className="px-5 pt-4 pb-2 text-xs text-gray-500 border-b border-gray-800">
+                  <div className="px-5 pt-5 pb-3 text-xs text-gray-400 border-b border-gray-800">
                     {post.title.split('|')[0] || 'Топ-матч'}
                   </div>
 
@@ -135,29 +143,39 @@ function Home({ searchQuery, setSearchQuery }) {
                     <div className="flex items-center justify-between mb-8">
                       {/* Левая команда */}
                       <div className="text-center flex-1">
-                        <img src={post.team_logo1 || DEFAULT_LOGO} className="w-24 h-24 mx-auto rounded-full" alt="" />
-                        <p className="mt-4 font-semibold text-sm line-clamp-2">
+                        <img 
+                          src={post.team_logo1 || DEFAULT_LOGO} 
+                          className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" 
+                          alt="" 
+                        />
+                        <p className="mt-4 font-semibold text-base leading-tight line-clamp-2">
                           {post.title.split('—')[0]?.trim()}
                         </p>
                       </div>
 
                       {/* VS */}
                       <div className="text-center px-6">
-                        <div className="text-red-500 font-black text-5xl mb-2">VS</div>
-                        <div className="text-[10px] text-gray-500">Прогноз от PRO-SPORTS</div>
+                        <div className="text-red-500 font-black text-[46px] leading-none tracking-tighter mb-1 drop-shadow-md">
+                          VS
+                        </div>
+                        <div className="text-[10px] text-red-400/80 font-medium">ПРОГНОЗ</div>
                       </div>
 
                       {/* Правая команда */}
                       <div className="text-center flex-1">
-                        <img src={post.team_logo2 || DEFAULT_LOGO} className="w-24 h-24 mx-auto rounded-full" alt="" />
-                        <p className="mt-4 font-semibold text-sm line-clamp-2">
+                        <img 
+                          src={post.team_logo2 || DEFAULT_LOGO} 
+                          className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" 
+                          alt="" 
+                        />
+                        <p className="mt-4 font-semibold text-base leading-tight line-clamp-2">
                           {post.title.split('—')[1]?.trim()}
                         </p>
                       </div>
                     </div>
 
                     {/* Время матча */}
-                    <div className="bg-[#1a1a1a] text-center py-3.5 rounded-2xl text-sm font-medium text-gray-300">
+                    <div className="bg-[#1a1a1a] text-center py-3.5 rounded-2xl text-sm font-medium text-gray-300 border border-gray-700">
                       {new Date(post.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })},&nbsp;
                       {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} МСК
                     </div>
@@ -172,7 +190,7 @@ function Home({ searchQuery, setSearchQuery }) {
   )
 }
 
-// Детальная страница в стиле azartnews
+// Детальная страница
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -196,7 +214,6 @@ function PrognozPage() {
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white pt-20 pb-20">
       <div className="max-w-5xl mx-auto px-6">
-        {/* Название лиги */}
         <div className="text-center text-sm text-gray-500 mb-4">
           {post.title.split('|')[0] || 'Топ-матч'}
         </div>
@@ -205,7 +222,6 @@ function PrognozPage() {
           {post.title}
         </h1>
 
-        {/* Логотипы команд */}
         <div className="flex justify-center items-center gap-12 mb-12">
           <div className="text-center">
             <img src={post.team_logo1 || DEFAULT_LOGO} className="w-32 h-32 mx-auto rounded-full border-4 border-red-600" alt="" />
@@ -220,7 +236,6 @@ function PrognozPage() {
           </div>
         </div>
 
-        {/* Время матча */}
         <div className="text-center text-xl text-gray-400 mb-12">
           {new Date(post.created_at).toLocaleString('ru-RU', {
             day: '2-digit',
@@ -230,10 +245,8 @@ function PrognozPage() {
           })} МСК
         </div>
 
-        {/* Полный прогноз */}
         <div className="prose prose-invert max-w-none text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }} />
 
-        {/* Кнопка ставки */}
         <div className="text-center mt-16">
           <a
             href={WINLINE_LINK}

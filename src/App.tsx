@@ -38,12 +38,10 @@ const parseTeamsFromTitle = (title: string): Teams | null => {
       .split(separator)
       .map((part) => part.trim())
       .filter(Boolean);
-
     if (parts.length >= 2) {
       return { home: parts[0], away: parts[1] };
     }
   }
-
   return null;
 };
 
@@ -75,7 +73,6 @@ export default function App() {
         searchQuery={searchQuery}
         onSearch={setSearchQuery}
       />
-
       <Routes>
         <Route
           path="/"
@@ -102,7 +99,7 @@ function TopNavigation({
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-4 md:px-6">
         <Link to="/" className="text-2xl font-black tracking-tight">
-          SPOOORT<span className="text-red-500">NEWS</span>
+          PRO<span className="text-red-500">-SPORTS</span>
         </Link>
 
         <div className="relative ml-auto hidden w-full max-w-lg md:block">
@@ -135,7 +132,6 @@ function HomePage({
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedSport, setSelectedSport] = useState<SportFilter>("all");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -148,19 +144,15 @@ function HomePage({
 
       if (error) {
         console.error("Ошибка загрузки:", error.message);
-        setError("Не удалось загрузить материалы. Попробуйте обновить страницу.");
       }
-
       setPosts((data as Post[]) || []);
       setLoading(false);
     };
-
     loadPosts();
   }, []);
 
   const filteredPosts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-
     return posts.filter((post) => {
       const sportMatch = selectedSport === "all" || post.sport === selectedSport;
       const searchMatch = query.length === 0 || post.title?.toLowerCase().includes(query);
@@ -170,6 +162,7 @@ function HomePage({
 
   const highlightedPost = filteredPosts[0];
   const feedPosts = highlightedPost ? filteredPosts.slice(1) : filteredPosts;
+
   const highlightedTeams = highlightedPost ? parseTeamsFromTitle(highlightedPost.title) : null;
 
   const getViewsCount = (postId: string | number | null | undefined) => {
@@ -182,36 +175,8 @@ function HomePage({
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pb-14 pt-8 md:px-6">
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 md:p-12">
-        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-red-500/20 blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" />
-
-        <div className="relative z-10 grid gap-8 md:grid-cols-[1.6fr_1fr] md:items-end">
-          <div>
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-red-400/40 bg-red-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-300">
-              <Flame className="h-4 w-4" /> Обновлённый дизайн
-            </p>
-            <h1 className="mb-4 text-4xl font-black uppercase leading-tight md:text-5xl">
-              Быстрые новости и прогнозы в новом визуальном стиле
-            </h1>
-            <p className="max-w-2xl text-zinc-300">
-              Контрастный тёмный интерфейс, акцентные карточки и удобная навигация по
-              видам спорта — всё в одном экране.
-            </p>
-          </div>
-
-          <a
-            href={WINLINE_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-red-500"
-          >
-            Перейти к партнёру <ChevronRight className="h-4 w-4" />
-          </a>
-        </div>
-      </section>
-
-      <section className="mt-8 flex flex-wrap gap-2">
+      {/* Фильтры */}
+      <section className="flex flex-wrap gap-2">
         {sportOptions.map((option) => (
           <button
             key={option.value}
@@ -225,78 +190,65 @@ function HomePage({
             {option.label}
           </button>
         ))}
-
-        <div className="relative ml-auto w-full md:hidden">
-          <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-zinc-500" />
-          <input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full rounded-full border border-zinc-700 bg-zinc-900/80 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-red-500"
-            placeholder="Поиск по заголовку..."
-          />
-        </div>
       </section>
 
-      {highlightedPost && (
-        <section className="mt-8 rounded-3xl border border-white/10 bg-zinc-900/70 p-4 md:p-6">
-          <Link to={`/prognoz/${highlightedPost.id}`} className="grid gap-5 md:grid-cols-[280px_1fr]">
-            <img
-              src={highlightedPost.image_url || DEFAULT_IMAGE}
-              alt={highlightedPost.title}
-              className="h-52 w-full rounded-2xl object-cover md:h-full"
-            />
-            <div>
-              <p className="mb-3 text-xs uppercase tracking-[0.2em] text-red-300">Главный материал</p>
-              <h2 className="text-2xl font-black uppercase leading-tight md:text-3xl">
-                {highlightedPost.title}
-              </h2>
+      <h2 className="mt-10 mb-8 text-4xl font-black uppercase tracking-wider">
+        СВЕЖИЕ ПРОГНОЗЫ
+      </h2>
 
-              {highlightedTeams && (
-                <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-zinc-200">
-                  <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
-                    {highlightedTeams.home}
-                  </span>
-                  <span className="text-red-400">VS</span>
-                  <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
-                    {highlightedTeams.away}
-                  </span>
+      {loading ? (
+        <div className="py-20 text-center text-zinc-400">Загрузка данных...</div>
+      ) : filteredPosts.length === 0 ? (
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-10 text-center text-zinc-400">
+          Ничего не найдено. Попробуйте другой фильтр или запрос.
+        </div>
+      ) : (
+        <>
+          {/* Главная большая карточка */}
+          {highlightedPost && (
+            <section className="mb-10 rounded-3xl border border-white/10 bg-zinc-900/70 p-4 md:p-6">
+              <Link to={`/prognoz/${highlightedPost.id}`} className="grid gap-5 md:grid-cols-[280px_1fr]">
+                <img
+                  src={highlightedPost.image_url || DEFAULT_IMAGE}
+                  alt={highlightedPost.title}
+                  className="h-52 w-full rounded-2xl object-cover md:h-full"
+                />
+                <div>
+                  <h2 className="text-2xl font-black uppercase leading-tight md:text-3xl">
+                    {highlightedPost.title}
+                  </h2>
+                  {highlightedTeams && (
+                    <div className="mt-4 flex items-center gap-3 text-sm font-semibold text-zinc-200">
+                      <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
+                        {highlightedTeams.home}
+                      </span>
+                      <span className="text-red-400">VS</span>
+                      <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-3 py-1">
+                        {highlightedTeams.away}
+                      </span>
+                    </div>
+                  )}
+                  <p className="mt-4 line-clamp-3 text-zinc-300">
+                    {stripHtml(highlightedPost.content)}
+                  </p>
+                  <div className="mt-5 flex items-center gap-4 text-sm text-zinc-400">
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarDays className="h-4 w-4" />
+                      {new Date(highlightedPost.created_at).toLocaleDateString("ru-RU")}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Eye className="h-4 w-4" /> {getViewsCount(highlightedPost.id)}
+                    </span>
+                  </div>
                 </div>
-              )}
+              </Link>
+            </section>
+          )}
 
-              <p className="mt-4 line-clamp-3 text-zinc-300">{stripHtml(highlightedPost.content)}</p>
-
-              <div className="mt-5 flex items-center gap-4 text-sm text-zinc-400">
-                <span className="inline-flex items-center gap-1">
-                  <CalendarDays className="h-4 w-4" />
-                  {new Date(highlightedPost.created_at).toLocaleDateString("ru-RU")}
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <Eye className="h-4 w-4" /> {getViewsCount(highlightedPost.id)}
-                </span>
-              </div>
-            </div>
-          </Link>
-        </section>
-      )}
-
-      <section className="mt-8">
-        <h2 className="mb-5 text-3xl font-black uppercase">Свежие материалы</h2>
-
-        {loading ? (
-          <div className="py-20 text-center text-zinc-400">Загрузка данных...</div>
-        ) : error ? (
-          <div className="rounded-2xl border border-rose-700/40 bg-rose-900/20 p-10 text-center text-rose-200">
-            {error}
-          </div>
-        ) : feedPosts.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-10 text-center text-zinc-400">
-            Ничего не найдено. Попробуйте другой фильтр или запрос.
-          </div>
-        ) : (
+          {/* Остальные карточки */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {feedPosts.map((post, index) => {
               const teams = parseTeamsFromTitle(post.title);
-
               return (
                 <motion.article
                   key={post.id}
@@ -314,12 +266,10 @@ function HomePage({
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     </div>
-
                     <div className="p-4">
                       <h3 className="line-clamp-2 text-lg font-bold uppercase leading-tight group-hover:text-red-300">
                         {post.title}
                       </h3>
-
                       {teams && (
                         <div className="mt-2 flex items-center gap-2 text-xs font-semibold text-zinc-300">
                           <span className="rounded-full border border-zinc-700 bg-zinc-800/70 px-2 py-1">
@@ -331,9 +281,9 @@ function HomePage({
                           </span>
                         </div>
                       )}
-
-                      <p className="mt-2 line-clamp-2 text-sm text-zinc-400">{stripHtml(post.content)}</p>
-
+                      <p className="mt-2 line-clamp-2 text-sm text-zinc-400">
+                        {stripHtml(post.content)}
+                      </p>
                       <div className="mt-3 flex items-center gap-3 text-xs text-zinc-500">
                         <span className="inline-flex items-center gap-1">
                           <CalendarDays className="h-3.5 w-3.5" />
@@ -349,8 +299,8 @@ function HomePage({
               );
             })}
           </div>
-        )}
-      </section>
+        </>
+      )}
     </main>
   );
 }
@@ -359,7 +309,6 @@ function PrognozPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -367,28 +316,20 @@ function PrognozPage() {
         setLoading(false);
         return;
       }
-
       const { data, error } = await supabase.from("posts").select("*").eq("id", id).single();
-
-      if (error) {
-        setError("Не удалось загрузить материал.");
-      }
-
       setPost((data as Post) || null);
       setLoading(false);
     };
-
     loadPost();
   }, [id]);
 
   if (loading) {
     return <div className="mx-auto max-w-3xl px-4 py-20 text-zinc-400">Загрузка...</div>;
   }
-
   if (!post) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-20 text-zinc-400">
-        {error || "Материал не найден."}
+        Материал не найден.
       </div>
     );
   }

@@ -134,26 +134,19 @@ function Home({ searchQuery, setSearchQuery }) {
               <motion.div whileHover={{ y: -10, scale: 1.02 }} className="group">
                 <Card className="bg-gradient-to-br from-[#121212] to-[#0f0f0f] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-3xl overflow-hidden h-full shadow-xl group-hover:shadow-2xl group-hover:shadow-red-900/20">
                   
-                  {/* Название лиги */}
                   <div className="px-5 pt-5 pb-3 text-xs text-gray-400 border-b border-gray-800">
                     {post.title.split('|')[0] || 'Топ-матч'}
                   </div>
 
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-8">
-                      {/* Левая команда */}
                       <div className="text-center flex-1">
-                        <img 
-                          src={post.team_logo1 || DEFAULT_LOGO} 
-                          className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" 
-                          alt="" 
-                        />
+                        <img src={post.team_logo1 || DEFAULT_LOGO} className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" alt="" />
                         <p className="mt-4 font-semibold text-base leading-tight line-clamp-2">
                           {post.title.split('—')[0]?.trim()}
                         </p>
                       </div>
 
-                      {/* VS */}
                       <div className="text-center px-6">
                         <div className="text-red-500 font-black text-[46px] leading-none tracking-tighter mb-1 drop-shadow-md">
                           VS
@@ -161,20 +154,14 @@ function Home({ searchQuery, setSearchQuery }) {
                         <div className="text-[10px] text-red-400/80 font-medium">ПРОГНОЗ</div>
                       </div>
 
-                      {/* Правая команда */}
                       <div className="text-center flex-1">
-                        <img 
-                          src={post.team_logo2 || DEFAULT_LOGO} 
-                          className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" 
-                          alt="" 
-                        />
+                        <img src={post.team_logo2 || DEFAULT_LOGO} className="w-24 h-24 mx-auto rounded-full transition-transform duration-300 group-hover:scale-110" alt="" />
                         <p className="mt-4 font-semibold text-base leading-tight line-clamp-2">
                           {post.title.split('—')[1]?.trim()}
                         </p>
                       </div>
                     </div>
 
-                    {/* Время матча */}
                     <div className="bg-[#1a1a1a] text-center py-3.5 rounded-2xl text-sm font-medium text-gray-300 border border-gray-700">
                       {new Date(post.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })},&nbsp;
                       {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} МСК
@@ -190,7 +177,7 @@ function Home({ searchQuery, setSearchQuery }) {
   )
 }
 
-// Детальная страница
+// ==================== ДЕТАЛЬНАЯ СТРАНИЦА ====================
 function PrognozPage() {
   const { id } = useParams<{ id: string }>()
   const [post, setPost] = useState<any>(null)
@@ -212,9 +199,9 @@ function PrognozPage() {
   const teams = post.title.split('—').map((t: string) => t.trim())
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white pt-20 pb-20">
+    <div className="min-h-screen bg-[#0b0b0f] text-white pt-20 pb-24">
       <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center text-sm text-gray-500 mb-4">
+        <div className="text-center text-sm text-gray-500 mb-3">
           {post.title.split('|')[0] || 'Топ-матч'}
         </div>
 
@@ -222,21 +209,21 @@ function PrognozPage() {
           {post.title}
         </h1>
 
-        <div className="flex justify-center items-center gap-12 mb-12">
+        <div className="flex justify-center items-center gap-16 mb-12">
           <div className="text-center">
-            <img src={post.team_logo1 || DEFAULT_LOGO} className="w-32 h-32 mx-auto rounded-full border-4 border-red-600" alt="" />
-            <p className="mt-4 font-bold text-xl">{teams[0]}</p>
+            <img src={post.team_logo1 || DEFAULT_LOGO} className="w-32 h-32 mx-auto rounded-full border-4 border-red-600 shadow-2xl" alt="" />
+            <p className="mt-5 font-bold text-2xl">{teams[0]}</p>
           </div>
 
           <div className="text-6xl font-black text-red-500">VS</div>
 
           <div className="text-center">
-            <img src={post.team_logo2 || DEFAULT_LOGO} className="w-32 h-32 mx-auto rounded-full border-4 border-red-600" alt="" />
-            <p className="mt-4 font-bold text-xl">{teams[1]}</p>
+            <img src={post.team_logo2 || DEFAULT_LOGO} className="w-32 h-32 mx-auto rounded-full border-4 border-red-600 shadow-2xl" alt="" />
+            <p className="mt-5 font-bold text-2xl">{teams[1]}</p>
           </div>
         </div>
 
-        <div className="text-center text-xl text-gray-400 mb-12">
+        <div className="text-center text-xl text-gray-400 mb-16">
           {new Date(post.created_at).toLocaleString('ru-RU', {
             day: '2-digit',
             month: '2-digit',
@@ -245,14 +232,49 @@ function PrognozPage() {
           })} МСК
         </div>
 
-        <div className="prose prose-invert max-w-none text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div className="prose prose-invert max-w-none text-lg leading-relaxed mb-16" dangerouslySetInnerHTML={{ __html: post.content }} />
 
-        <div className="text-center mt-16">
+        {/* Таблица коэффициентов */}
+        <div className="mb-16">
+          <h3 className="text-2xl font-bold mb-6 text-center">Лучшие коэффициенты</h3>
+          <div className="overflow-x-auto rounded-2xl border border-gray-800">
+            <table className="w-full border-collapse bg-[#121212]">
+              <thead>
+                <tr className="bg-zinc-900">
+                  <th className="px-6 py-4 text-left">Букмекер</th>
+                  <th className="px-6 py-4 text-center">П1</th>
+                  <th className="px-6 py-4 text-center">X</th>
+                  <th className="px-6 py-4 text-center">П2</th>
+                  <th className="px-6 py-4 text-center">ТБ 2.5</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                <tr className="border-t border-gray-800 hover:bg-zinc-900/70">
+                  <td className="px-6 py-4 font-medium">Winline</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">2.15</td>
+                  <td className="px-6 py-4 text-center">3.40</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">3.10</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">1.85</td>
+                </tr>
+                <tr className="border-t border-gray-800 hover:bg-zinc-900/70">
+                  <td className="px-6 py-4 font-medium">Betsxwin</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">2.18</td>
+                  <td className="px-6 py-4 text-center">3.35</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">3.05</td>
+                  <td className="px-6 py-4 text-center text-green-400 font-bold">1.88</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Маленькая кнопка ставки */}
+        <div className="text-center">
           <a
             href={WINLINE_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-red-600 hover:bg-red-500 text-white font-bold text-xl px-12 py-5 rounded-2xl transition-all"
+            className="inline-flex items-center gap-3 bg-red-600 hover:bg-red-500 text-white font-bold px-10 py-4 rounded-2xl text-lg transition-all"
           >
             СДЕЛАТЬ СТАВКУ В WINLINE →
           </a>

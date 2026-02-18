@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
+import DOMPurify from 'dompurify'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
 const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
@@ -13,13 +14,11 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <div>
-      {/* Навигация */}
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
 
-          {/* Поиск */}
           <div className="flex-1 max-w-xl mx-6 relative hidden md:block">
             <div className="relative">
               <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
@@ -28,7 +27,7 @@ export default function App() {
                 placeholder="Поиск матча или команды..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600"
+                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600 transition-colors"
               />
             </div>
           </div>
@@ -52,10 +51,10 @@ export default function App() {
 }
 
 // ==================== ГЛАВНАЯ СТРАНИЦА ====================
-function Home({ searchQuery, setSearchQuery }) {
+function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (v: string) => void }) {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
-  const [selectedSport, setSelectedSport] = useState('all')
+  const [selectedSport, setSelectedSport] = useState<'all' | string>('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -65,7 +64,7 @@ function Home({ searchQuery, setSearchQuery }) {
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(30)
+        .limit(40)
 
       if (error) console.error(error)
       else {
@@ -81,12 +80,12 @@ function Home({ searchQuery, setSearchQuery }) {
     let result = posts
 
     if (selectedSport !== 'all') {
-      result = result.filter(post => post.sport === selectedSport)
+      result = result.filter(p => p.sport === selectedSport)
     }
 
-    if (searchQuery.trim() !== '') {
+    if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim()
-      result = result.filter(post => post.title.toLowerCase().includes(q))
+      result = result.filter(p => p.title.toLowerCase().includes(q))
     }
 
     setFilteredPosts(result)
@@ -133,7 +132,6 @@ function Home({ searchQuery, setSearchQuery }) {
             <Link key={post.id} to={`/prognoz/${post.id}`}>
               <motion.div whileHover={{ y: -10, scale: 1.02 }} className="group">
                 <Card className="bg-gradient-to-br from-[#121212] to-[#0f0f0f] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-3xl overflow-hidden h-full shadow-xl group-hover:shadow-2xl group-hover:shadow-red-900/20">
-                  
                   <div className="px-5 pt-5 pb-3 text-xs text-gray-400 border-b border-gray-800">
                     {post.title.split('|')[0] || 'Топ-матч'}
                   </div>
@@ -232,7 +230,7 @@ function PrognozPage() {
           })} МСК
         </div>
 
-        <div className="prose prose-invert max-w-none text-lg leading-relaxed mb-16" dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div className="prose prose-invert max-w-none text-lg leading-relaxed mb-16" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
 
         {/* Таблица коэффициентов */}
         <div className="mb-16">
@@ -268,7 +266,7 @@ function PrognozPage() {
           </div>
         </div>
 
-        {/* Маленькая кнопка ставки */}
+        {/* Маленькая кнопка */}
         <div className="text-center">
           <a
             href={WINLINE_LINK}

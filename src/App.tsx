@@ -14,6 +14,7 @@ export default function App() {
 
   return (
     <div>
+      {/* Навигация */}
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
@@ -50,7 +51,7 @@ export default function App() {
 }
 
 // ==================== ГЛАВНАЯ СТРАНИЦА ====================
-function Home({ searchQuery, setSearchQuery }) {
+function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (v: string) => void }) {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
   const [selectedSport, setSelectedSport] = useState('all')

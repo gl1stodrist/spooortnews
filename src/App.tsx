@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
-import DOMPurify from 'dompurify'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
 const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
@@ -14,7 +13,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div>
       <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
@@ -27,7 +26,7 @@ export default function App() {
                 placeholder="Поиск матча или команды..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600 transition-colors"
+                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600"
               />
             </div>
           </div>
@@ -51,10 +50,10 @@ export default function App() {
 }
 
 // ==================== ГЛАВНАЯ СТРАНИЦА ====================
-function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (v: string) => void }) {
+function Home({ searchQuery, setSearchQuery }) {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
-  const [selectedSport, setSelectedSport] = useState<'all' | string>('all')
+  const [selectedSport, setSelectedSport] = useState('all')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -64,7 +63,7 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(40)
+        .limit(30)
 
       if (error) console.error(error)
       else {
@@ -80,12 +79,12 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
     let result = posts
 
     if (selectedSport !== 'all') {
-      result = result.filter(p => p.sport === selectedSport)
+      result = result.filter(post => post.sport === selectedSport)
     }
 
-    if (searchQuery.trim()) {
+    if (searchQuery.trim() !== '') {
       const q = searchQuery.toLowerCase().trim()
-      result = result.filter(p => p.title.toLowerCase().includes(q))
+      result = result.filter(post => post.title.toLowerCase().includes(q))
     }
 
     setFilteredPosts(result)
@@ -230,7 +229,7 @@ function PrognozPage() {
           })} МСК
         </div>
 
-        <div className="prose prose-invert max-w-none text-lg leading-relaxed mb-16" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+        <div className="prose prose-invert max-w-none text-lg leading-relaxed mb-16" dangerouslySetInnerHTML={{ __html: post.content }} />
 
         {/* Таблица коэффициентов */}
         <div className="mb-16">
@@ -266,7 +265,6 @@ function PrognozPage() {
           </div>
         </div>
 
-        {/* Маленькая кнопка */}
         <div className="text-center">
           <a
             href={WINLINE_LINK}

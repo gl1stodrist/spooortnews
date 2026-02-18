@@ -3,7 +3,7 @@ import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
-import { Search, Clock } from 'lucide-react'
+import { Search } from 'lucide-react'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
 const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'

@@ -3,52 +3,92 @@ import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useLocation, useParams } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { Search, Clock, Zap } from 'lucide-react'
 
 const WINLINE_LINK = import.meta.env.VITE_WINLINE_LINK || 'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
 const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
-export default function App() {
-  const location = useLocation()
-  const [searchQuery, setSearchQuery] = useState('')
+// ==================== НОВЫЕ КОМПОНЕНТЫ ====================
 
+// 1. Confidence Badge
+const ConfidenceBadge = ({ confidence }: { confidence: number }) => {
+  const color = confidence >= 85 ? 'text-emerald-400' : confidence >= 75 ? 'text-yellow-400' : 'text-gray-400'
   return (
-    <div>
-      {/* Навигация */}
-      <nav className="fixed top-0 left-0 right-0 bg-black/95 backdrop-blur z-50 border-b border-gray-800">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-3xl font-black text-red-500">PRO-SPORTS</Link>
-
-          <div className="flex-1 max-w-xl mx-6 relative hidden md:block">
-            <div className="relative">
-              <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Поиск матча или команды..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-gray-700 pl-11 py-3 rounded-full text-sm focus:outline-none focus:border-red-600"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-7 text-base">
-            <Link to="/" className={location.pathname === '/' ? 'text-red-500' : 'hover:text-red-400'}>Главная</Link>
-            <Link to="/football" className={location.pathname === '/football' ? 'text-red-500' : 'hover:text-red-400'}>Футбол</Link>
-            <Link to="/cybersport" className={location.pathname === '/cybersport' ? 'text-red-500' : 'hover:text-red-400'}>Киберспорт</Link>
-            <Link to="/hockey" className={location.pathname === '/hockey' ? 'text-red-500' : 'hover:text-red-400'}>Хоккей</Link>
-            <Link to="/basketball" className={location.pathname === '/basketball' ? 'text-red-500' : 'hover:text-red-400'}>Баскетбол</Link>
-          </div>
-        </div>
-      </nav>
-
-      <Routes>
-        <Route path="/" element={<Home searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
-        <Route path="/prognoz/:id" element={<PrognozPage />} />
-      </Routes>
+    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold border ${color} border-current bg-black/70 backdrop-blur`}>
+      AI {confidence}%
     </div>
   )
 }
+
+// 2. Countdown Timer
+const CountdownTimer = ({ targetDate }: { targetDate: string }) => {
+  const [timeLeft, setTimeLeft] = useState('')
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date().getTime()
+      const target = new Date(targetDate).getTime()
+      const distance = target - now
+
+      if (distance < 0) {
+        setTimeLeft('LIVE')
+        return
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000)
+
+      setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [targetDate])
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-emerald-400">
+      <Clock size={14} />
+      <span>{timeLeft}</span>
+    </div>
+  )
+}
+
+// 3. Skeleton Card
+const SkeletonCard = () => (
+  <div className="bg-[#121212] border border-gray-800 rounded-3xl overflow-hidden h-full">
+    <div className="h-2 bg-gray-700 w-3/4 mx-auto mt-5 rounded" />
+    <div className="p-6">
+      <div className="flex justify-between mb-8">
+        <div className="w-20 h-20 bg-gray-700 rounded-full animate-pulse" />
+        <div className="text-center">
+          <div className="text-5xl text-gray-700">VS</div>
+        </div>
+        <div className="w-20 h-20 bg-gray-700 rounded-full animate-pulse" />
+      </div>
+      <div className="h-10 bg-gray-700 rounded-2xl animate-pulse" />
+    </div>
+  </div>
+)
+
+// 4. Sticky CTA
+const StickyCTA = () => (
+  <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black to-transparent z-50 md:hidden border-t border-red-600/30">
+    <div className="bg-black/95 backdrop-blur-lg px-4 py-4 flex items-center justify-between">
+      <div>
+        <div className="text-xs text-gray-400">Лучший коэффициент</div>
+        <div className="text-xl font-bold text-white">2.18</div>
+      </div>
+      <a
+        href={WINLINE_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="bg-red-600 hover:bg-red-500 px-8 py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-95"
+      >
+        СДЕЛАТЬ СТАВКУ →
+      </a>
+    </div>
+  </div>
+)
 
 // ==================== ГЛАВНАЯ СТРАНИЦА ====================
 function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (v: string) => void }) {
@@ -92,7 +132,7 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
   }, [selectedSport, searchQuery, posts])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white pt-24">
+    <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20">
       {/* Фильтры */}
       <div className="flex justify-center gap-3 pt-6 pb-8 overflow-x-auto px-4">
         {[
@@ -121,7 +161,9 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
       </h2>
 
       {loading ? (
-        <div className="text-center py-20 text-xl text-gray-400">Загрузка...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
+          {[...Array(8)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
       ) : filteredPosts.length === 0 ? (
         <div className="text-center py-32 text-xl text-gray-500">
           Пока нет прогнозов<br />Бот скоро добавит новые
@@ -130,7 +172,7 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
           {filteredPosts.map(post => (
             <Link key={post.id} to={`/prognoz/${post.id}`}>
-              <motion.div whileHover={{ y: -10, scale: 1.02 }} className="group">
+              <motion.div whileHover={{ y: -10, scale: 1.02 }} className="group relative">
                 <Card className="bg-gradient-to-br from-[#121212] to-[#0f0f0f] border border-gray-800 hover:border-red-600 transition-all duration-300 rounded-3xl overflow-hidden h-full shadow-xl group-hover:shadow-2xl group-hover:shadow-red-900/20">
                   <div className="px-5 pt-5 pb-3 text-xs text-gray-400 border-b border-gray-800">
                     {post.title.split('|')[0] || 'Топ-матч'}
@@ -165,12 +207,17 @@ function Home({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQ
                       {new Date(post.created_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} МСК
                     </div>
                   </CardContent>
+
+                  {/* Confidence Badge */}
+                  <ConfidenceBadge confidence={82} />
                 </Card>
               </motion.div>
             </Link>
           ))}
         </div>
       )}
+
+      <StickyCTA />
     </div>
   )
 }
@@ -277,6 +324,26 @@ function PrognozPage() {
           </a>
         </div>
       </div>
+
+      <StickyCTA />
     </div>
   )
 }
+
+// ==================== STICKY CTA ====================
+function StickyCTA() {
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gradient-to-t from-black via-black/95 to-transparent py-4 px-4 border-t border-red-600/30">
+      <a
+        href={WINLINE_LINK}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition-all active:scale-95"
+      >
+        СДЕЛАТЬ СТАВКУ В WINLINE →
+      </a>
+    </div>
+  )
+}
+
+export default App

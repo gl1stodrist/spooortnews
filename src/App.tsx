@@ -2,13 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
-import {
-  Link,
-  Routes,
-  Route,
-  useParams,
-  BrowserRouter
-} from 'react-router-dom'
+import { Link, Routes, Route, useParams } from 'react-router-dom'
 
 const WINLINE_LINK =
   import.meta.env.VITE_WINLINE_LINK ||
@@ -65,9 +59,7 @@ function Home() {
     let result = posts
 
     if (selectedSport !== 'all') {
-      result = result.filter(
-        post => post.sport === selectedSport
-      )
+      result = result.filter(post => post.sport === selectedSport)
     }
 
     setFilteredPosts(result)
@@ -85,9 +77,7 @@ function Home() {
         ].map(item => (
           <button
             key={item.value}
-            onClick={() =>
-              setSelectedSport(item.value)
-            }
+            onClick={() => setSelectedSport(item.value)}
             className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               selectedSport === item.value
                 ? 'bg-red-600 text-white'
@@ -114,30 +104,19 @@ function Home() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
           {filteredPosts.map(post => (
-            <Link
-              key={post.id}
-              to={`/prognoz/${post.id}`}
-            >
-              <motion.div
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="group"
-              >
+            <Link key={post.id} to={`/prognoz/${post.id}`}>
+              <motion.div whileHover={{ y: -10, scale: 1.02 }}>
                 <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl overflow-hidden">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="text-center flex-1">
                         <img
-                          src={
-                            post.team_logo1 ||
-                            DEFAULT_LOGO
-                          }
+                          src={post.team_logo1 || DEFAULT_LOGO}
                           className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
                         />
                         <p className="mt-3 text-sm">
-                          {
-                            post.title
-                              .split('—')[0]
-                          }
+                          {post.title.split('—')[0]}
                         </p>
                       </div>
 
@@ -147,17 +126,12 @@ function Home() {
 
                       <div className="text-center flex-1">
                         <img
-                          src={
-                            post.team_logo2 ||
-                            DEFAULT_LOGO
-                          }
+                          src={post.team_logo2 || DEFAULT_LOGO}
                           className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
                         />
                         <p className="mt-3 text-sm">
-                          {
-                            post.title
-                              .split('—')[1]
-                          }
+                          {post.title.split('—')[1]}
                         </p>
                       </div>
                     </div>
@@ -196,11 +170,7 @@ function PrognozPage() {
   }, [id])
 
   if (loading)
-    return (
-      <div className="text-center py-40">
-        Загрузка...
-      </div>
-    )
+    return <div className="text-center py-40">Загрузка...</div>
 
   if (!post)
     return (
@@ -217,9 +187,7 @@ function PrognozPage() {
 
       <div
         className="prose prose-invert max-w-4xl mx-auto"
-        dangerouslySetInnerHTML={{
-          __html: post.content
-        }}
+        dangerouslySetInnerHTML={{ __html: post.content }}
       />
 
       <div className="text-center mt-10">
@@ -241,15 +209,10 @@ function PrognozPage() {
 // ==================== APP ====================
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/prognoz/:id"
-          element={<PrognozPage />}
-        />
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/prognoz/:id" element={<PrognozPage />} />
+    </Routes>
   )
 }
 

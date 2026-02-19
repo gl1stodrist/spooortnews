@@ -258,3 +258,6 @@ function PrognozPage() {
     </div>
   )
 }
+
+// ==================== ЭКСПОРТ ====================
+export default App

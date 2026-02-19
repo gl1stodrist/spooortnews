@@ -261,3 +261,35 @@ function PrognozPage() {
 
 // ==================== ЭКСПОРТ ====================
 export default App
+import { BrowserRouter } from 'react-router-dom'
+
+function App() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const location = useLocation()
+
+  return (
+    <>
+      <Routes location={location}>
+        <Route
+          path="/"
+          element={
+            <Home
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          }
+        />
+        <Route path="/prognoz/:id" element={<PrognozPage />} />
+      </Routes>
+    </>
+  )
+}
+
+export default function RootApp() {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  )
+}
+

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 
-const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
+const DEFAULT_LOGO = '/assets/default-team.png' // локальный placeholder
 
 // ==================== ФОРМАТ ДАТЫ ====================
 function formatDate(date: string) {
@@ -14,7 +14,7 @@ function formatDate(date: string) {
     month: 'long',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   }).format(new Date(date))
 }
 
@@ -58,7 +58,7 @@ function PredictionCard({ post }: { post: any }) {
             {formatDate(post.created_at)}
           </div>
 
-          {/* JSON-LD для структурированных данных */}
+          {/* JSON-LD */}
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
@@ -66,7 +66,7 @@ function PredictionCard({ post }: { post: any }) {
               "name": post.title,
               "startDate": post.created_at,
               "eventStatus": "https://schema.org/EventScheduled",
-              "location": { "@type": "Place", "name": "Стадион" }
+              "location": { "@type": "Place", "name": "Стадион" },
             })}
           </script>
         </CardContent>
@@ -96,26 +96,21 @@ function Home() {
         setPosts(data)
         setFilteredPosts(data)
       }
-
       setLoading(false)
     }
-
     fetchPosts()
   }, [])
 
   useEffect(() => {
     let result = posts
-
     if (selectedSport !== 'all') {
       result = result.filter(post => post.sport === selectedSport)
     }
-
     if (searchTerm.trim() !== '') {
       result = result.filter(post =>
         post.title?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
-
     setFilteredPosts(result)
   }, [selectedSport, searchTerm, posts])
 
@@ -151,7 +146,7 @@ function Home() {
           { value: 'soccer', label: '⚽ Футбол' },
           { value: 'cs2', label: '🎮 Киберспорт' },
           { value: 'hockey', label: '🏒 Хоккей' },
-          { value: 'basketball', label: '🏀 Баскетбол' }
+          { value: 'basketball', label: '🏀 Баскетбол' },
         ].map(item => (
           <button
             key={item.value}
@@ -197,11 +192,9 @@ function PrognozPage() {
         .select('*')
         .eq('slug', slug)
         .single()
-
       if (data) setPost(data)
       setLoading(false)
     }
-
     fetchPost()
   }, [slug])
 
@@ -227,16 +220,12 @@ function PrognozPage() {
 
       <div className="max-w-4xl mx-auto">
         <div className="text-sm text-gray-500 mb-4">Главная → {post.title}</div>
-
         <h1 className="text-4xl font-black mb-6">{post.title}</h1>
-
         <div className="text-gray-400 mb-8">{formatDate(post.created_at)}</div>
 
         <div
           className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{
-            __html: post.content
-          }}
+          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </div>
     </div>
@@ -250,6 +239,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/prognoz/:slug" element={<PrognozPage />} />
+        {/* костыль на 404 — все остальные пути на главную */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </HelmetProvider>
   )

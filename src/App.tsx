@@ -38,6 +38,59 @@ function StickyCTA() {
   )
 }
 
+// ==================== КАРТОЧКА ПРОГНОЗА ====================
+function PredictionCard({ post }: { post: any }) {
+  return (
+    <motion.div
+      whileHover={{ y: -6 }}
+      className="bg-[#121212] border border-gray-800 rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+    >
+      <Link to={`/prognoz/${post.id}`}>
+        <CardContent className="p-6 flex flex-col justify-between h-full">
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <img
+                src={post.team_logo1 || DEFAULT_LOGO}
+                className="w-20 h-20 mx-auto rounded-full"
+                alt=""
+              />
+              <p className="mt-3 text-sm text-white font-semibold">
+                {post.title?.split('—')[0]}
+              </p>
+            </div>
+
+            <div className="text-red-500 font-black text-3xl">VS</div>
+
+            <div className="text-center flex-1">
+              <img
+                src={post.team_logo2 || DEFAULT_LOGO}
+                className="w-20 h-20 mx-auto rounded-full"
+                alt=""
+              />
+              <p className="mt-3 text-sm text-white font-semibold">
+                {post.title?.split('—')[1]}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mt-6 text-gray-500 text-sm">
+            {formatDate(post.created_at)}
+          </div>
+
+          <a
+            href={WINLINE_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 block bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl text-center transition-colors"
+          >
+            Сделать ставку →
+          </a>
+        </CardContent>
+      </Link>
+    </motion.div>
+  )
+}
+
 // ==================== ГЛАВНАЯ ====================
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
@@ -70,16 +123,12 @@ function Home() {
     let result = posts
 
     if (selectedSport !== 'all') {
-      result = result.filter(
-        post => post.sport === selectedSport
-      )
+      result = result.filter(post => post.sport === selectedSport)
     }
 
     if (searchTerm.trim() !== '') {
       result = result.filter(post =>
-        post.title
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase())
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
@@ -127,51 +176,11 @@ function Home() {
       </h2>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">
-          Загрузка...
-        </div>
+        <div className="text-center py-20 text-gray-400">Загрузка...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">
           {filteredPosts.map(post => (
-            <Link key={post.id} to={`/prognoz/${post.id}`}>
-              <motion.div whileHover={{ y: -6 }}>
-                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-center">
-                      <div className="text-center flex-1">
-                        <img
-                          src={post.team_logo1 || DEFAULT_LOGO}
-                          className="w-20 h-20 mx-auto rounded-full"
-                          alt=""
-                        />
-                        <p className="mt-3 text-sm">
-                          {post.title?.split('—')[0]}
-                        </p>
-                      </div>
-
-                      <div className="text-red-500 font-black text-3xl">
-                        VS
-                      </div>
-
-                      <div className="text-center flex-1">
-                        <img
-                          src={post.team_logo2 || DEFAULT_LOGO}
-                          className="w-20 h-20 mx-auto rounded-full"
-                          alt=""
-                        />
-                        <p className="mt-3 text-sm">
-                          {post.title?.split('—')[1]}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="text-center mt-6 text-gray-500 text-sm">
-                      {formatDate(post.created_at)}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </Link>
+            <PredictionCard key={post.id} post={post} />
           ))}
         </div>
       )}
@@ -219,13 +228,9 @@ function PrognozPage() {
           Главная → {post.title}
         </div>
 
-        <h1 className="text-4xl font-black mb-6">
-          {post.title}
-        </h1>
+        <h1 className="text-4xl font-black mb-6">{post.title}</h1>
 
-        <div className="text-gray-400 mb-8">
-          {formatDate(post.created_at)}
-        </div>
+        <div className="text-gray-400 mb-8">{formatDate(post.created_at)}</div>
 
         <div
           className="prose prose-invert max-w-none"

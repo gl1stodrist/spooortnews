@@ -5,12 +5,7 @@ import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 
-const WINLINE_LINK =
-  import.meta.env.VITE_WINLINE_LINK ||
-  'https://betsxwin.pro/click?o=5&a=49439&link_id=20&sub_id3=tg'
-
-const DEFAULT_LOGO =
-  'https://via.placeholder.com/120?text=Team'
+const DEFAULT_LOGO = 'https://via.placeholder.com/120?text=Team'
 
 // ==================== ФОРМАТ ДАТЫ ====================
 function formatDate(date: string) {
@@ -21,22 +16,6 @@ function formatDate(date: string) {
     hour: '2-digit',
     minute: '2-digit'
   }).format(new Date(date))
-}
-
-// ==================== STICKY CTA ====================
-function StickyCTA() {
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-black border-t border-red-600/30 p-4">
-      <a
-        href={WINLINE_LINK}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition-all"
-      >
-        СДЕЛАТЬ СТАВКУ →
-      </a>
-    </div>
-  )
 }
 
 // ==================== КАРТОЧКА ПРОГНОЗА ====================
@@ -78,15 +57,6 @@ function PredictionCard({ post }: { post: any }) {
           <div className="text-center mt-6 text-gray-500 text-sm">
             {formatDate(post.created_at)}
           </div>
-
-          <a
-            href={WINLINE_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 block bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl text-center transition-colors"
-          >
-            Сделать ставку →
-          </a>
 
           {/* JSON-LD для структурированных данных */}
           <script type="application/ld+json">
@@ -155,7 +125,7 @@ function Home() {
         <title>Прогнозы на спорт от нейросети — spooort.ru</title>
         <meta
           name="description"
-          content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта. Сделайте ставку с WinLine через spooort.ru"
+          content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта."
         />
         <meta
           name="keywords"
@@ -210,8 +180,6 @@ function Home() {
           ))}
         </div>
       )}
-
-      <StickyCTA />
     </div>
   )
 }
@@ -253,7 +221,7 @@ function PrognozPage() {
         <title>{post.title} — spooort.ru</title>
         <meta
           name="description"
-          content={`Прогноз на матч ${post.title}. Сделайте ставку с WinLine через spooort.ru`}
+          content={`Прогноз на матч ${post.title}.`}
         />
       </Helmet>
 
@@ -270,20 +238,7 @@ function PrognozPage() {
             __html: post.content
           }}
         />
-
-        <div className="text-center mt-12">
-          <a
-            href={WINLINE_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-xl font-bold inline-block"
-          >
-            Сделать ставку →
-          </a>
-        </div>
       </div>
-
-      <StickyCTA />
     </div>
   )
 }

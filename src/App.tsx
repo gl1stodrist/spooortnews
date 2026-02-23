@@ -1,150 +1,310 @@
-import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabase'
-import { Card, CardContent } from '@/components/ui/card'
-import { motion } from 'framer-motion'
-import { Link, Routes, Route, useParams } from 'react-router-dom'
-import { Helmet, HelmetProvider } from 'react-helmet-async'
+// src/App.tsx
+import React, { useState } from 'react';
 
-// ==================== PLACEHOLDER LOGO ====================
-const DEFAULT_LOGO =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAABVJ4fnAAAACXBIWXMAAAsTAAALEwEAmpwYAAACM0lEQVR4nO3asU4DQRAG4F/gF4AO6B+cQ5BWEMEw0egmKREtsp+Vlk2eXapXbrdnTp06dOnTp06dOnTp06dOnTp06dOnTq36A1sFu1Ff3oEwGqH9kzbnUBoClEPx4aH6RQC5S+0cQGcLJzzSxvAAig0s4gHACrEKwNYDn3p5cikMGkgE4B/soN+gFjz7+4BNfG6FB+4AJz6mGgP4J5ADfF6pHZQ/qNwBpPOYAFsH5gEXw9RA5p4P1gu6A7+WbJdYJZkb8b+wJ9sDYDfArwImC1+6kBvA9wtm5AP8M8gDcE0C+R6GvAvkekVfJgAeBDAz/YHcBZAbw3s2kF4F8vYVZgZsLfATyLx9qAfBjxfAAcBfAmA1sZfA/AfAmgP4L+J+HwAdg/4f8Vv+AX4i+R/BJ4H8CvCPwWwEXAtwEv8E+DqV/8TWB9qW9RUG1X+gcD2sXQLrB8glg4fBCU5h9SvQNgR/Z4Afgs0G3vypkH8C+hsN9H2V3A3w2xqk31/8TfMB8Drw/v0je0q/yTgAAAAASUVORK5CYII='
-
-// ==================== ФОРМАТ ДАТЫ ====================
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date))
+interface Prediction {
+  id: number;
+  sport: string;
+  home: string;
+  homeLogo: string;
+  away: string;
+  awayLogo: string;
+  prediction: string;
+  date: string;
+  time: string;
+  coeff?: string;
 }
 
-// ==================== КАРТОЧКА ПРОГНОЗА ====================
-function PredictionCard({ post }: { post: any }) {
-  const slug = post.slug || `prognoz-${post.id}`
+const App: React.FC = () => {
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const predictions: Prediction[] = [
+    {
+      id: 1,
+      sport: 'football',
+      home: 'Atleti',
+      homeLogo: '🔴',
+      away: 'Club Brugge',
+      awayLogo: '🔵',
+      prediction: 'Обе забьют',
+      date: '24 февраля 2026 г.',
+      time: '00:36',
+    },
+    {
+      id: 2,
+      sport: 'football',
+      home: 'Bristol City',
+      homeLogo: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+      away: 'Wrexham',
+      awayLogo: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+      prediction: 'Обе забьют',
+      date: '17 февраля 2026 г.',
+      time: '20:51',
+    },
+    {
+      id: 3,
+      sport: 'football',
+      home: 'Monaco',
+      homeLogo: '🇲🇨',
+      away: 'PSG',
+      awayLogo: '🇫🇷',
+      prediction: 'Тотал больше 2.5',
+      date: '17 февраля 2026 г.',
+      time: '19:58',
+      coeff: '1.74',
+    },
+    {
+      id: 4,
+      sport: 'esports',
+      home: 'Fuego',
+      homeLogo: '🔥',
+      away: 'Chivas Esports',
+      awayLogo: '🌶️',
+      prediction: 'Fuego победит',
+      date: '17 февраля 2026 г.',
+      time: '02:02',
+    },
+    {
+      id: 5,
+      sport: 'esports',
+      home: 'VP.Prodigy',
+      homeLogo: '🟣',
+      away: 'CSDIILIT',
+      awayLogo: '🔵',
+      prediction: 'VP.Prodigy +1.5',
+      date: '17 февраля 2026 г.',
+      time: '02:02',
+    },
+    {
+      id: 6,
+      sport: 'esports',
+      home: 'Time Waves',
+      homeLogo: '🌊',
+      away: 'BBBMBCBS',
+      awayLogo: '🔴',
+      prediction: 'Time Waves победит',
+      date: '17 февраля 2026 г.',
+      time: '02:02',
+    },
+    {
+      id: 7,
+      sport: 'football',
+      home: 'LAZER',
+      homeLogo: '⚽',
+      away: 'LYON',
+      awayLogo: '🇫🇷',
+      prediction: 'Победа LAZER',
+      date: '17 февраля 2026 г.',
+      time: '03:00',
+    },
+  ];
+
+  const filteredPredictions = predictions.filter((p) => {
+    const matchesSearch =
+      p.home.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.away.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.prediction.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = activeFilter === 'all' || p.sport === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const aboutCards = [
+    {
+      icon: '🤖',
+      title: 'Нейросеть',
+      desc: 'Прогнозы генерируются мощной ИИ-моделью, которая анализирует тысячи статистических показателей в реальном времени.',
+    },
+    {
+      icon: '⚡',
+      title: 'Скорость',
+      desc: 'Обновление каждые 4 часа. Только самые актуальные матчи с реальными коэффициентами.',
+    },
+    {
+      icon: '🏆',
+      title: 'Все виды спорта',
+      desc: 'Футбол, хоккей, баскетбол, теннис, CS2 и другие дисциплины — всё в одном месте.',
+    },
+    {
+      icon: '💰',
+      title: 'Бесплатно и удобно',
+      desc: 'Никакой регистрации. Просто, красиво, доступно каждому. Revshare 20% для партнёров.',
+    },
+  ];
+
   return (
-    <motion.div whileHover={{ y: -6 }} className="bg-[#121212] border border-gray-800 rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-      <Link to={`/prognoz/${slug}`}>
-        <CardContent className="p-6 flex flex-col justify-between h-full">
-          <div className="flex justify-between items-center">
-            <div className="text-center flex-1">
-              <img src={post.team_logo1 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt={`${post.title?.split('—')[0]} логотип`} />
-              <p className="mt-3 text-sm text-white font-semibold">{post.title?.split('—')[0]}</p>
+    <div className="min-h-screen bg-zinc-950 text-white font-sans">
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-900/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* 1. НАШ КОМПАКТНЫЙ ЛОГОТИП (красная S) */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-black rounded-2xl flex items-center justify-center border-2 border-red-500/60 shadow-2xl overflow-hidden">
+              <span className="text-[42px] font-black text-red-500 tracking-[-6px] leading-none">S</span>
             </div>
-            <div className="text-red-500 font-black text-3xl">VS</div>
-            <div className="text-center flex-1">
-              <img src={post.team_logo2 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt={`${post.title?.split('—')[1]} логотип`} />
-              <p className="mt-3 text-sm text-white font-semibold">{post.title?.split('—')[1]}</p>
+            <div className="leading-none">
+              <div className="text-3xl font-black tracking-tighter">spooort</div>
+              <div className="text-[10px] text-zinc-500 -mt-1">.ru</div>
             </div>
           </div>
-          <div className="text-center mt-6 text-gray-500 text-sm">{formatDate(post.created_at)}</div>
-        </CardContent>
-      </Link>
-    </motion.div>
-  )
-}
 
-// ==================== ГЛАВНАЯ ====================
-function Home() {
-  const [posts, setPosts] = useState<any[]>([])
-  const [filteredPosts, setFilteredPosts] = useState<any[]>([])
-  const [selectedSport, setSelectedSport] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [loading, setLoading] = useState(true)
+          {/* 2. ПОИСК + МАЛЕНЬКАЯ ЛУПА */}
+          <div className="flex-1 max-w-xl mx-8 relative group">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Поиск прогноза..."
+                className="w-full bg-zinc-800 border border-zinc-700 focus:border-red-500 rounded-3xl py-3.5 pl-14 pr-6 text-base placeholder:text-zinc-500 focus:outline-none transition"
+              />
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-red-500 transition">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 01-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-  useEffect(() => {
-    async function fetchPosts() {
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(30)
-      if (!error && data) { setPosts(data); setFilteredPosts(data) }
-      setLoading(false)
-    }
-    fetchPosts()
-  }, [])
+          {/* 3. ПРАВЫЙ БЛОК (иконка пользователя + кнопка) */}
+          <div className="flex items-center gap-6">
+            <div className="w-10 h-10 bg-zinc-800 hover:bg-zinc-700 rounded-2xl flex items-center justify-center cursor-pointer transition">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-9-5.197V8.5m.002 3.5L12 15l-3 3" />
+              </svg>
+            </div>
+            <div className="w-10 h-10 bg-zinc-800 hover:bg-zinc-700 rounded-2xl flex items-center justify-center cursor-pointer transition">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7" />
+              </svg>
+            </div>
+            <button className="bg-red-600 hover:bg-red-700 px-8 py-2.5 rounded-3xl text-sm font-semibold transition">
+              Войти
+            </button>
+          </div>
+        </div>
 
-  useEffect(() => {
-    let result = posts
-    if (selectedSport !== 'all') result = result.filter(post => post.sport === selectedSport)
-    if (searchTerm.trim() !== '') result = result.filter(post => post.title?.toLowerCase().includes(searchTerm.toLowerCase()))
-    setFilteredPosts(result)
-  }, [selectedSport, searchTerm, posts])
+        {/* ФИЛЬТРЫ */}
+        <div className="max-w-7xl mx-auto px-6 pb-6 flex gap-3 flex-wrap">
+          {[
+            { key: 'all', label: 'Все' },
+            { key: 'football', label: '⚽ Футбол' },
+            { key: 'esports', label: '🎮 Киберспорт' },
+            { key: 'hockey', label: '🏒 Хоккей' },
+            { key: 'basketball', label: '🏀 Баскетбол' },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setActiveFilter(f.key)}
+              className={`px-6 py-2 rounded-3xl text-sm font-medium transition ${
+                activeFilter === f.key
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-500/30'
+                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </header>
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-24">
-      <Helmet>
-        <title>Прогнозы на спорт от нейросети — spooort.ru</title>
-        <meta name="description" content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта." />
-        <meta name="keywords" content="прогнозы, спорт, ставки, нейросеть, футбол, хоккей, баскетбол, киберспорт" />
-      </Helmet>
+      <main className="max-w-7xl mx-auto px-6 pt-10 pb-20">
+        <h1 className="text-center text-6xl font-black tracking-tighter mb-16">
+          СВЕЖИЕ ПРОГНОЗЫ
+        </h1>
 
-      <div className="max-w-5xl mx-auto px-4 mb-6">
-        <input type="text" placeholder="Поиск прогноза..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600" />
-      </div>
+        {/* СЕТКА ПРОГНОЗОВ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPredictions.map((p) => (
+            <div
+              key={p.id}
+              className="group bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-500/50 transition-all hover:-translate-y-1"
+            >
+              <div className="p-7">
+                <div className="flex justify-between items-center mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-3xl">
+                      {p.homeLogo}
+                    </div>
+                    <div className="font-bold text-2xl tracking-tight">{p.home}</div>
+                  </div>
 
-      <div className="flex justify-center gap-3 pb-8 overflow-x-auto px-4">
-        {[{ value:'all', label:'Все'},{ value:'soccer', label:'⚽ Футбол'},{ value:'cs2', label:'🎮 Киберспорт'},{ value:'hockey', label:'🏒 Хоккей'},{ value:'basketball', label:'🏀 Баскетбол'}].map(item => (
-          <button key={item.value} onClick={() => setSelectedSport(item.value)} className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${selectedSport===item.value?'bg-red-600 text-white':'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'}`}>{item.label}</button>
-        ))}
-      </div>
+                  <div className="text-red-600 font-black text-4xl">VS</div>
 
-      <h1 className="text-center text-4xl font-black mb-12">СВЕЖИЕ ПРОГНОЗЫ</h1>
+                  <div className="flex items-center gap-4 flex-row-reverse">
+                    <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-3xl">
+                      {p.awayLogo}
+                    </div>
+                    <div className="font-bold text-2xl tracking-tight text-right">{p.away}</div>
+                  </div>
+                </div>
 
-      {loading ? <div className="text-center py-20 text-gray-400">Загрузка...</div> 
-        : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">{filteredPosts.map(post => <PredictionCard key={post.id} post={post} />)}</div>}
+                <div className="bg-black/60 rounded-2xl p-6 text-center border border-zinc-700/50">
+                  <div className="uppercase text-red-400 text-xs tracking-widest mb-2">НАШ ПРОГНОЗ</div>
+                  <div className="text-3xl font-bold mb-1">{p.prediction}</div>
+                  {p.coeff && (
+                    <div className="text-emerald-400 text-2xl font-semibold">@{p.coeff}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-zinc-800 bg-zinc-950 px-7 py-4 flex justify-between text-sm text-zinc-400">
+                <div>{p.date}</div>
+                <div className="font-mono">в {p.time}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* === РАЗДЕЛ О НАС (квадратики как у Lovable) === */}
+        <div className="mt-32">
+          <div className="text-center mb-16">
+            <div className="inline-block bg-zinc-900 text-red-400 text-sm px-8 py-2 rounded-3xl mb-4 border border-red-500/20">
+              О НАС
+            </div>
+            <h2 className="text-5xl font-black tracking-tighter mb-4">
+              spooort.ru — прогнозы от нейросети
+            </h2>
+            <p className="max-w-2xl mx-auto text-zinc-400 text-lg leading-relaxed">
+              Современный спортивный портал с прогнозами от нейросети. Мы анализируем футбольные, хоккейные, баскетбольные и киберспортивные матчи, чтобы дать пользователям актуальные и точные прогнозы. Всё просто, удобно и доступно каждому.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {aboutCards.map((card, index) => (
+              <div
+                key={index}
+                className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all group hover:-translate-y-2"
+              >
+                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-5xl mb-8 group-hover:scale-110 transition-transform">
+                  {card.icon}
+                </div>
+                <h3 className="text-2xl font-semibold mb-4 tracking-tight">{card.title}</h3>
+                <p className="text-zinc-400 leading-relaxed">{card.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-black py-12 border-t border-zinc-900">
+        <div className="max-w-7xl mx-auto px-6 text-center text-zinc-500 text-sm">
+          © 2026 spooort.ru • Все прогнозы — для развлечения • Revshare 20% навсегда
+        </div>
+      </footer>
     </div>
-  )
-}
+  );
+};
 
-// ==================== СТРАНИЦА ПРОГНОЗА ====================
-function PrognozPage() {
-  const { slug } = useParams()
-  const [post, setPost] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchPost() {
-      const { data } = await supabase.from('posts').select('*').eq('slug', slug).single()
-      if (data) setPost(data)
-      setLoading(false)
-    }
-    fetchPost()
-  }, [slug])
-
-  if (loading) return <div className="text-center py-40">Загрузка...</div>
-  if (!post) return <div className="text-center py-40 text-red-500">Прогноз не найден</div>
-
-  return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-24 px-6">
-      <Helmet>
-        <title>{post.title} — spooort.ru</title>
-        <meta name="description" content={`Прогноз на матч ${post.title}.`} />
-      </Helmet>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-sm text-gray-500 mb-4">Главная → {post.title}</div>
-        <h1 className="text-4xl font-black mb-6">{post.title}</h1>
-        <div className="text-gray-400 mb-8">{formatDate(post.created_at)}</div>
-        <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
-      </div>
-    </div>
-  )
-}
-
-// ==================== APP ====================
-function App() {
-  return (
-    <HelmetProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/prognoz/:slug" element={<PrognozPage />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
-    </HelmetProvider>
-  )
-}
-
-export default App
+export default App;

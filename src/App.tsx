@@ -11,16 +11,16 @@ const WINLINE_LINK =
 const DEFAULT_LOGO =
   'https://via.placeholder.com/120?text=Team'
 
-/* ================== STICKY CTA ================== */
+// ================= STICKY CTA =================
 
 function StickyCTA() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-black border-t border-red-600/30 p-4">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gradient-to-t from-black via-black/95 to-transparent py-4 px-4 border-t border-red-600/30">
       <a
         href={WINLINE_LINK}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition active:scale-95"
+        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition-all active:scale-95"
       >
         СДЕЛАТЬ СТАВКУ →
       </a>
@@ -28,12 +28,13 @@ function StickyCTA() {
   )
 }
 
-/* ================== ГЛАВНАЯ ================== */
+// ================= ГЛАВНАЯ =================
 
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
   const [selectedSport, setSelectedSport] = useState('all')
+  const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -43,7 +44,6 @@ function Home() {
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(30)
 
       setPosts(data || [])
       setFilteredPosts(data || [])
@@ -54,18 +54,37 @@ function Home() {
   }, [])
 
   useEffect(() => {
-    if (selectedSport === 'all') {
-      setFilteredPosts(posts)
-    } else {
-      setFilteredPosts(
-        posts.filter(p => p.sport === selectedSport)
+    let result = posts
+
+    if (selectedSport !== 'all') {
+      result = result.filter(post => post.sport === selectedSport)
+    }
+
+    if (search) {
+      result = result.filter(post =>
+        post.title.toLowerCase().includes(search.toLowerCase())
       )
     }
-  }, [selectedSport, posts])
+
+    setFilteredPosts(result)
+  }, [selectedSport, search, posts])
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20">
-      <div className="flex justify-center gap-3 pt-6 pb-8 overflow-x-auto px-4">
+
+      {/* ПОИСК */}
+      <div className="max-w-xl mx-auto px-4 mb-8">
+        <input
+          type="text"
+          placeholder="Поиск прогноза..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-[#111] border border-gray-700 rounded-xl px-5 py-3 text-white focus:outline-none focus:border-red-600"
+        />
+      </div>
+
+      {/* ФИЛЬТРЫ */}
+      <div className="flex justify-center gap-3 pb-8 overflow-x-auto px-4">
         {[
           { value: 'all', label: 'Все' },
           { value: 'soccer', label: '⚽ Футбол' },
@@ -76,7 +95,7 @@ function Home() {
           <button
             key={item.value}
             onClick={() => setSelectedSport(item.value)}
-            className={`px-6 py-2.5 rounded-full text-sm font-medium transition ${
+            className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
               selectedSport === item.value
                 ? 'bg-red-600 text-white'
                 : 'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'
@@ -87,26 +106,27 @@ function Home() {
         ))}
       </div>
 
-      <h2 className="text-center text-5xl font-black tracking-wider mb-14">
+      <h2 className="text-center text-4xl md:text-5xl font-black tracking-wider mb-12">
         СВЕЖИЕ ПРОГНОЗЫ
       </h2>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">
+        <div className="text-center py-20 text-xl text-gray-400">
           Загрузка...
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
           {filteredPosts.map(post => (
             <Link key={post.id} to={`/prognoz/${post.id}`}>
-              <motion.div whileHover={{ y: -6 }}>
-                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl overflow-hidden transition">
+              <motion.div whileHover={{ y: -8 }}>
+                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl overflow-hidden transition-all">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
                       <div className="text-center flex-1">
                         <img
                           src={post.team_logo1 || DEFAULT_LOGO}
                           className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
                         />
                         <p className="mt-3 text-sm">
                           {post.title.split('—')[0]}
@@ -121,6 +141,7 @@ function Home() {
                         <img
                           src={post.team_logo2 || DEFAULT_LOGO}
                           className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
                         />
                         <p className="mt-3 text-sm">
                           {post.title.split('—')[1]}
@@ -140,7 +161,7 @@ function Home() {
   )
 }
 
-/* ================== СТРАНИЦА ПРОГНОЗА ================== */
+// ================= СТРАНИЦА ПРОГНОЗА =================
 
 function PrognozPage() {
   const { id } = useParams()
@@ -157,6 +178,10 @@ function PrognozPage() {
 
       setPost(data)
       setLoading(false)
+
+      if (data?.title) {
+        document.title = `${data.title} | Spooort`
+      }
     }
 
     fetchPost()
@@ -172,55 +197,39 @@ function PrognozPage() {
       </div>
     )
 
-  const team1 = post.title.split('—')[0]
-  const team2 = post.title.split('—')[1]
-
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-28 px-4">
+    <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-24 px-6">
 
-      {/* Карточка матча */}
-      <div className="max-w-4xl mx-auto mb-12">
-        <Card className="bg-[#111] border border-gray-800 rounded-3xl p-8">
-          <div className="flex items-center justify-between">
-            <div className="text-center flex-1">
-              <img
-                src={post.team_logo1 || DEFAULT_LOGO}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h2 className="text-xl font-bold">{team1}</h2>
-            </div>
+      <div className="max-w-4xl mx-auto">
 
-            <div className="text-4xl font-black text-red-500">
-              VS
-            </div>
+        {/* ЗАГОЛОВОК */}
+        <div className="bg-[#121212] p-8 rounded-3xl border border-gray-800 mb-10 text-center">
+          <h1 className="text-3xl md:text-4xl font-black mb-3">
+            {post.title}
+          </h1>
 
-            <div className="text-center flex-1">
-              <img
-                src={post.team_logo2 || DEFAULT_LOGO}
-                className="w-24 h-24 mx-auto rounded-full mb-4"
-              />
-              <h2 className="text-xl font-bold">{team2}</h2>
-            </div>
-          </div>
-        </Card>
-      </div>
+          <p className="text-gray-400 text-sm">
+            Опубликовано {new Date(post.created_at).toLocaleDateString()}
+          </p>
+        </div>
 
-      {/* Контент */}
-      <div
-        className="prose prose-invert max-w-3xl mx-auto prose-p:text-gray-300 prose-headings:text-white"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
+        {/* КОНТЕНТ */}
+        <div
+          className="prose prose-invert max-w-none bg-[#121212] p-8 rounded-3xl border border-gray-800"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
-      {/* CTA */}
-      <div className="text-center mt-14">
-        <a
-          href={WINLINE_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block bg-red-600 hover:bg-red-500 px-10 py-5 rounded-2xl font-bold text-lg transition active:scale-95"
-        >
-          СДЕЛАТЬ СТАВКУ →
-        </a>
+        {/* CTA */}
+        <div className="text-center mt-10">
+          <a
+            href={WINLINE_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-2xl font-bold text-lg transition-all"
+          >
+            СДЕЛАТЬ СТАВКУ →
+          </a>
+        </div>
       </div>
 
       <StickyCTA />
@@ -228,7 +237,7 @@ function PrognozPage() {
   )
 }
 
-/* ================== APP ================== */
+// ================= ROUTES =================
 
 function App() {
   return (

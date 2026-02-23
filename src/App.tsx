@@ -3,8 +3,6 @@ import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
-import { Search, Star } from 'lucide-react'
-import { Helmet } from 'react-helmet-async'
 
 const WINLINE_LINK =
   import.meta.env.VITE_WINLINE_LINK ||
@@ -13,8 +11,7 @@ const WINLINE_LINK =
 const DEFAULT_LOGO =
   'https://via.placeholder.com/120?text=Team'
 
-/* ================= FORMAT DATE ================= */
-
+// ==================== ФОРМАТ ДАТЫ ====================
 function formatDate(date: string) {
   return new Intl.DateTimeFormat('ru-RU', {
     day: '2-digit',
@@ -25,32 +22,15 @@ function formatDate(date: string) {
   }).format(new Date(date))
 }
 
-/* ================= RATING ================= */
-
-function Rating({ value = 4 }: { value?: number }) {
-  return (
-    <div className="flex gap-1 justify-center mt-4">
-      {[1,2,3,4,5].map(i => (
-        <Star
-          key={i}
-          size={18}
-          className={i <= value ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}
-        />
-      ))}
-    </div>
-  )
-}
-
-/* ================= STICKY (ONLY HOME) ================= */
-
+// ==================== STICKY CTA ====================
 function StickyCTA() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 md:hidden bg-black/95 border-t border-red-600/30 p-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-black border-t border-red-600/30 p-4">
       <a
         href={WINLINE_LINK}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition"
+        className="block w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-2xl text-center text-lg transition-all"
       >
         СДЕЛАТЬ СТАВКУ →
       </a>
@@ -58,87 +38,136 @@ function StickyCTA() {
   )
 }
 
-/* ================= HOME ================= */
-
+// ==================== ГЛАВНАЯ ====================
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
-  const [filtered, setFiltered] = useState<any[]>([])
-  const [sport, setSport] = useState('all')
-  const [search, setSearch] = useState('')
+  const [filteredPosts, setFilteredPosts] = useState<any[]>([])
+  const [selectedSport, setSelectedSport] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
+    async function fetchPosts() {
+      const { data, error } = await supabase
         .from('posts')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-      setPosts(data || [])
-      setFiltered(data || [])
+        .limit(30)
+
+      if (!error && data) {
+        setPosts(data)
+        setFilteredPosts(data)
+      }
+
       setLoading(false)
     }
-    load()
+
+    fetchPosts()
   }, [])
 
   useEffect(() => {
     let result = posts
 
-    if (sport !== 'all') {
-      result = result.filter(p => p.sport === sport)
-    }
-
-    if (search.trim() !== '') {
-      result = result.filter(p =>
-        p.title.toLowerCase().includes(search.toLowerCase())
+    if (selectedSport !== 'all') {
+      result = result.filter(
+        post => post.sport === selectedSport
       )
     }
 
-    setFiltered(result)
-  }, [sport, search, posts])
+    if (searchTerm.trim() !== '') {
+      result = result.filter(post =>
+        post.title
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    }
+
+    setFilteredPosts(result)
+  }, [selectedSport, searchTerm, posts])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20">
-
-      <Helmet>
-        <title>Бесплатные прогнозы на спорт | Spooort</title>
-        <meta name="description" content="Лучшие бесплатные прогнозы на футбол, хоккей, киберспорт и баскетбол." />
-      </Helmet>
-
-      {/* SEARCH */}
-      <div className="max-w-xl mx-auto mb-8 px-4">
-        <div className="flex items-center bg-[#1a1a1a] rounded-2xl px-4 py-3">
-          <Search className="text-gray-400 mr-3" size={20} />
-          <input
-            type="text"
-            placeholder="Поиск прогнозов..."
-            className="bg-transparent outline-none w-full text-white"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+    <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-24">
+      {/* ПОИСК */}
+      <div className="max-w-5xl mx-auto px-4 mb-6">
+        <input
+          type="text"
+          placeholder="Поиск прогноза..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600"
+        />
       </div>
 
-      <h2 className="text-center text-5xl font-black mb-12 tracking-wider">
+      {/* ФИЛЬТРЫ */}
+      <div className="flex justify-center gap-3 pb-8 overflow-x-auto px-4">
+        {[
+          { value: 'all', label: 'Все' },
+          { value: 'soccer', label: '⚽ Футбол' },
+          { value: 'cs2', label: '🎮 Киберспорт' },
+          { value: 'hockey', label: '🏒 Хоккей' },
+          { value: 'basketball', label: '🏀 Баскетбол' }
+        ].map(item => (
+          <button
+            key={item.value}
+            onClick={() => setSelectedSport(item.value)}
+            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${
+              selectedSport === item.value
+                ? 'bg-red-600 text-white'
+                : 'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      <h2 className="text-center text-4xl font-black mb-12">
         СВЕЖИЕ ПРОГНОЗЫ
       </h2>
 
       {loading ? (
-        <div className="text-center py-20">Загрузка...</div>
+        <div className="text-center py-20 text-gray-400">
+          Загрузка...
+        </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6 px-6 max-w-7xl mx-auto">
-          {filtered.map(post => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">
+          {filteredPosts.map(post => (
             <Link key={post.id} to={`/prognoz/${post.id}`}>
               <motion.div whileHover={{ y: -6 }}>
-                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl">
-                  <CardContent className="p-6 text-center">
-                    <p className="text-sm text-gray-400 mb-3">
+                <Card className="bg-[#121212] border border-gray-800 hover:border-red-600 rounded-3xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-center">
+                      <div className="text-center flex-1">
+                        <img
+                          src={post.team_logo1 || DEFAULT_LOGO}
+                          className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
+                        />
+                        <p className="mt-3 text-sm">
+                          {post.title?.split('—')[0]}
+                        </p>
+                      </div>
+
+                      <div className="text-red-500 font-black text-3xl">
+                        VS
+                      </div>
+
+                      <div className="text-center flex-1">
+                        <img
+                          src={post.team_logo2 || DEFAULT_LOGO}
+                          className="w-20 h-20 mx-auto rounded-full"
+                          alt=""
+                        />
+                        <p className="mt-3 text-sm">
+                          {post.title?.split('—')[1]}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-center mt-6 text-gray-500 text-sm">
                       {formatDate(post.created_at)}
-                    </p>
-                    <h3 className="font-bold text-lg mb-4">
-                      {post.title}
-                    </h3>
-                    <Rating value={post.rating || 4} />
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -152,98 +181,77 @@ function Home() {
   )
 }
 
-/* ================= DETAIL ================= */
-
+// ==================== СТРАНИЦА ПРОГНОЗА ====================
 function PrognozPage() {
   const { id } = useParams()
   const [post, setPost] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function load() {
+    async function fetchPost() {
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('id', id)
         .single()
-      setPost(data)
+
+      if (data) setPost(data)
+      setLoading(false)
     }
-    load()
+
+    fetchPost()
   }, [id])
 
-  if (!post) return <div className="text-center py-40">Загрузка...</div>
+  if (loading)
+    return <div className="text-center py-40">Загрузка...</div>
 
-  const schemaData = {
-    "@context": "https://schema.org",
-    "@type": "SportsEvent",
-    name: post.title,
-    startDate: post.created_at,
-    description: post.content.replace(/<[^>]*>?/gm, '').slice(0, 200),
-    eventStatus: "https://schema.org/EventScheduled"
-  }
+  if (!post)
+    return (
+      <div className="text-center py-40 text-red-500">
+        Прогноз не найден
+      </div>
+    )
 
   return (
-    <div className="min-h-screen bg-[#0b0b0f] text-white pt-20 pb-24 px-6">
-
-      <Helmet>
-        <title>{post.title} | Spooort</title>
-        <meta name="description" content={post.content.slice(0, 150)} />
-        <script type="application/ld+json">
-          {JSON.stringify(schemaData)}
-        </script>
-      </Helmet>
-
-      {/* BREADCRUMBS */}
-      <div className="text-sm text-gray-500 mb-6">
-        <Link to="/" className="hover:text-white">Главная</Link> → {post.title}
-      </div>
-
-      <h1 className="text-4xl font-black text-center mb-4">
-        {post.title}
-      </h1>
-
-      <p className="text-center text-gray-400 mb-6">
-        {formatDate(post.created_at)}
-      </p>
-
-      <Rating value={post.rating || 4} />
-
-      <div
-        className="prose prose-invert max-w-4xl mx-auto mt-10"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
-
-      {/* LIVE ODDS BLOCK */}
-      {post.odds && (
-        <div className="max-w-2xl mx-auto mt-12 bg-[#121212] p-6 rounded-2xl border border-gray-800">
-          <h3 className="text-xl font-bold mb-4 text-center">
-            Лучшие коэффициенты
-          </h3>
-          {post.odds.map((odd: any, index: number) => (
-            <div key={index} className="flex justify-between py-2 border-b border-gray-700">
-              <span>{odd.bookmaker}</span>
-              <span className="text-green-400 font-bold">{odd.value}</span>
-            </div>
-          ))}
+    <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-24 px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-sm text-gray-500 mb-4">
+          Главная → {post.title}
         </div>
-      )}
 
-      <div className="text-center mt-12">
-        <a
-          href={WINLINE_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-2xl font-bold text-lg"
-        >
-          СДЕЛАТЬ СТАВКУ →
-        </a>
+        <h1 className="text-4xl font-black mb-6">
+          {post.title}
+        </h1>
+
+        <div className="text-gray-400 mb-8">
+          {formatDate(post.created_at)}
+        </div>
+
+        <div
+          className="prose prose-invert max-w-none"
+          dangerouslySetInnerHTML={{
+            __html: post.content
+          }}
+        />
+
+        <div className="text-center mt-12">
+          <a
+            href={WINLINE_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-red-600 hover:bg-red-500 px-10 py-4 rounded-xl font-bold inline-block"
+          >
+            Сделать ставку →
+          </a>
+        </div>
       </div>
 
+      <StickyCTA />
     </div>
   )
 }
 
-/* ================= APP ================= */
-
+// ==================== APP ====================
 function App() {
   return (
     <Routes>

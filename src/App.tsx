@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet'
 
 const WINLINE_LINK =
   import.meta.env.VITE_WINLINE_LINK ||
@@ -40,19 +41,20 @@ function StickyCTA() {
 
 // ==================== КАРТОЧКА ПРОГНОЗА ====================
 function PredictionCard({ post }: { post: any }) {
+  const slug = post.slug || `prognoz-${post.id}`
   return (
     <motion.div
       whileHover={{ y: -6 }}
       className="bg-[#121212] border border-gray-800 rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
     >
-      <Link to={`/prognoz/${post.id}`}>
+      <Link to={`/prognoz/${slug}`}>
         <CardContent className="p-6 flex flex-col justify-between h-full">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
               <img
                 src={post.team_logo1 || DEFAULT_LOGO}
                 className="w-20 h-20 mx-auto rounded-full"
-                alt=""
+                alt={`${post.title?.split('—')[0]} логотип`}
               />
               <p className="mt-3 text-sm text-white font-semibold">
                 {post.title?.split('—')[0]}
@@ -65,7 +67,7 @@ function PredictionCard({ post }: { post: any }) {
               <img
                 src={post.team_logo2 || DEFAULT_LOGO}
                 className="w-20 h-20 mx-auto rounded-full"
-                alt=""
+                alt={`${post.title?.split('—')[1]} логотип`}
               />
               <p className="mt-3 text-sm text-white font-semibold">
                 {post.title?.split('—')[1]}
@@ -85,6 +87,18 @@ function PredictionCard({ post }: { post: any }) {
           >
             Сделать ставку →
           </a>
+
+          {/* JSON-LD для структурированных данных */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SportsEvent",
+              "name": post.title,
+              "startDate": post.created_at,
+              "eventStatus": "https://schema.org/EventScheduled",
+              "location": { "@type": "Place", "name": "Стадион" }
+            })}
+          </script>
         </CardContent>
       </Link>
     </motion.div>
@@ -137,6 +151,18 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-24">
+      <Helmet>
+        <title>Прогнозы на спорт от нейросети — spooort.ru</title>
+        <meta
+          name="description"
+          content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта. Сделайте ставку с WinLine через spooort.ru"
+        />
+        <meta
+          name="keywords"
+          content="прогнозы, спорт, ставки, нейросеть, футбол, хоккей, баскетбол, киберспорт"
+        />
+      </Helmet>
+
       {/* ПОИСК */}
       <div className="max-w-5xl mx-auto px-4 mb-6">
         <input
@@ -171,9 +197,9 @@ function Home() {
         ))}
       </div>
 
-      <h2 className="text-center text-4xl font-black mb-12">
+      <h1 className="text-center text-4xl font-black mb-12">
         СВЕЖИЕ ПРОГНОЗЫ
-      </h2>
+      </h1>
 
       {loading ? (
         <div className="text-center py-20 text-gray-400">Загрузка...</div>
@@ -192,7 +218,7 @@ function Home() {
 
 // ==================== СТРАНИЦА ПРОГНОЗА ====================
 function PrognozPage() {
-  const { id } = useParams()
+  const { slug } = useParams()
   const [post, setPost] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -201,7 +227,7 @@ function PrognozPage() {
       const { data } = await supabase
         .from('posts')
         .select('*')
-        .eq('id', id)
+        .eq('slug', slug)
         .single()
 
       if (data) setPost(data)
@@ -209,7 +235,7 @@ function PrognozPage() {
     }
 
     fetchPost()
-  }, [id])
+  }, [slug])
 
   if (loading)
     return <div className="text-center py-40">Загрузка...</div>
@@ -223,10 +249,16 @@ function PrognozPage() {
 
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-24 px-6">
+      <Helmet>
+        <title>{post.title} — spooort.ru</title>
+        <meta
+          name="description"
+          content={`Прогноз на матч ${post.title}. Сделайте ставку с WinLine через spooort.ru`}
+        />
+      </Helmet>
+
       <div className="max-w-4xl mx-auto">
-        <div className="text-sm text-gray-500 mb-4">
-          Главная → {post.title}
-        </div>
+        <div className="text-sm text-gray-500 mb-4">Главная → {post.title}</div>
 
         <h1 className="text-4xl font-black mb-6">{post.title}</h1>
 
@@ -261,7 +293,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/prognoz/:id" element={<PrognozPage />} />
+      <Route path="/prognoz/:slug" element={<PrognozPage />} />
     </Routes>
   )
 }

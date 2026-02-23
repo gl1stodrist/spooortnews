@@ -5,7 +5,9 @@ import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
 import { Helmet, HelmetProvider } from 'react-helmet-async'
 
-const DEFAULT_LOGO = '/assets/default-team.png' // локальный placeholder для команд
+// ==================== PLACEHOLDER LOGO ====================
+const DEFAULT_LOGO =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAABVJ4fnAAAACXBIWXMAAAsTAAALEwEAmpwYAAACM0lEQVR4nO3asU4DQRAG4F/gF4AO6B+cQ5BWEMEw0egmKREtsp+Vlk2eXapXbrdnTp06dOnTp06dOnTp06dOnTp06dOnTq36A1sFu1Ff3oEwGqH9kzbnUBoClEPx4aH6RQC5S+0cQGcLJzzSxvAAig0s4gHACrEKwNYDn3p5cikMGkgE4B/soN+gFjz7+4BNfG6FB+4AJz6mGgP4J5ADfF6pHZQ/qNwBpPOYAFsH5gEXw9RA5p4P1gu6A7+WbJdYJZkb8b+wJ9sDYDfArwImC1+6kBvA9wtm5AP8M8gDcE0C+R6GvAvkekVfJgAeBDAz/YHcBZAbw3s2kF4F8vYVZgZsLfATyLx9qAfBjxfAAcBfAmA1sZfA/AfAmgP4L+J+HwAdg/4f8Vv+AX4i+R/BJ4H8CvCPwWwEXAtwEv8E+DqV/8TWB9qW9RUG1X+gcD2sXQLrB8glg4fBCU5h9SvQNgR/Z4Afgs0G3vypkH8C+hsN9H2V3A3w2xqk31/8TfMB8Drw/v0je0q/yTgAAAAASUVORK5CYII='
 
 // ==================== ФОРМАТ ДАТЫ ====================
 function formatDate(date: string) {
@@ -27,33 +29,16 @@ function PredictionCard({ post }: { post: any }) {
         <CardContent className="p-6 flex flex-col justify-between h-full">
           <div className="flex justify-between items-center">
             <div className="text-center flex-1">
-              <img
-                src={post.team_logo1 || DEFAULT_LOGO}
-                className="w-20 h-20 mx-auto rounded-full"
-                alt={`${post.title?.split('—')[0]} логотип`}
-              />
-              <p className="mt-3 text-sm text-white font-semibold">
-                {post.title?.split('—')[0]}
-              </p>
+              <img src={post.team_logo1 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt={`${post.title?.split('—')[0]} логотип`} />
+              <p className="mt-3 text-sm text-white font-semibold">{post.title?.split('—')[0]}</p>
             </div>
-
             <div className="text-red-500 font-black text-3xl">VS</div>
-
             <div className="text-center flex-1">
-              <img
-                src={post.team_logo2 || DEFAULT_LOGO}
-                className="w-20 h-20 mx-auto rounded-full"
-                alt={`${post.title?.split('—')[1]} логотип`}
-              />
-              <p className="mt-3 text-sm text-white font-semibold">
-                {post.title?.split('—')[1]}
-              </p>
+              <img src={post.team_logo2 || DEFAULT_LOGO} className="w-20 h-20 mx-auto rounded-full" alt={`${post.title?.split('—')[1]} логотип`} />
+              <p className="mt-3 text-sm text-white font-semibold">{post.title?.split('—')[1]}</p>
             </div>
           </div>
-
-          <div className="text-center mt-6 text-gray-500 text-sm">
-            {formatDate(post.created_at)}
-          </div>
+          <div className="text-center mt-6 text-gray-500 text-sm">{formatDate(post.created_at)}</div>
         </CardContent>
       </Link>
     </motion.div>
@@ -76,11 +61,7 @@ function Home() {
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(30)
-
-      if (!error && data) {
-        setPosts(data)
-        setFilteredPosts(data)
-      }
+      if (!error && data) { setPosts(data); setFilteredPosts(data) }
       setLoading(false)
     }
     fetchPosts()
@@ -88,14 +69,8 @@ function Home() {
 
   useEffect(() => {
     let result = posts
-    if (selectedSport !== 'all') {
-      result = result.filter(post => post.sport === selectedSport)
-    }
-    if (searchTerm.trim() !== '') {
-      result = result.filter(post =>
-        post.title?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
+    if (selectedSport !== 'all') result = result.filter(post => post.sport === selectedSport)
+    if (searchTerm.trim() !== '') result = result.filter(post => post.title?.toLowerCase().includes(searchTerm.toLowerCase()))
     setFilteredPosts(result)
   }, [selectedSport, searchTerm, posts])
 
@@ -103,61 +78,24 @@ function Home() {
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-24">
       <Helmet>
         <title>Прогнозы на спорт от нейросети — spooort.ru</title>
-        <meta
-          name="description"
-          content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта."
-        />
-        <meta
-          name="keywords"
-          content="прогнозы, спорт, ставки, нейросеть, футбол, хоккей, баскетбол, киберспорт"
-        />
+        <meta name="description" content="Свежие прогнозы на спорт от нейросети. Анализ футбола, хоккея, баскетбола и киберспорта." />
+        <meta name="keywords" content="прогнозы, спорт, ставки, нейросеть, футбол, хоккей, баскетбол, киберспорт" />
       </Helmet>
 
-      {/* ПОИСК */}
       <div className="max-w-5xl mx-auto px-4 mb-6">
-        <input
-          type="text"
-          placeholder="Поиск прогноза..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600"
-        />
+        <input type="text" placeholder="Поиск прогноза..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full bg-[#1a1a1a] border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-red-600" />
       </div>
 
-      {/* ФИЛЬТРЫ */}
       <div className="flex justify-center gap-3 pb-8 overflow-x-auto px-4">
-        {[
-          { value: 'all', label: 'Все' },
-          { value: 'soccer', label: '⚽ Футбол' },
-          { value: 'cs2', label: '🎮 Киберспорт' },
-          { value: 'hockey', label: '🏒 Хоккей' },
-          { value: 'basketball', label: '🏀 Баскетбол' },
-        ].map(item => (
-          <button
-            key={item.value}
-            onClick={() => setSelectedSport(item.value)}
-            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${
-              selectedSport === item.value
-                ? 'bg-red-600 text-white'
-                : 'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'
-            }`}
-          >
-            {item.label}
-          </button>
+        {[{ value:'all', label:'Все'},{ value:'soccer', label:'⚽ Футбол'},{ value:'cs2', label:'🎮 Киберспорт'},{ value:'hockey', label:'🏒 Хоккей'},{ value:'basketball', label:'🏀 Баскетбол'}].map(item => (
+          <button key={item.value} onClick={() => setSelectedSport(item.value)} className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all ${selectedSport===item.value?'bg-red-600 text-white':'bg-[#1f1f1f] text-gray-400 hover:bg-[#2a2a2a]'}`}>{item.label}</button>
         ))}
       </div>
 
       <h1 className="text-center text-4xl font-black mb-12">СВЕЖИЕ ПРОГНОЗЫ</h1>
 
-      {loading ? (
-        <div className="text-center py-20 text-gray-400">Загрузка...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">
-          {filteredPosts.map(post => (
-            <PredictionCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+      {loading ? <div className="text-center py-20 text-gray-400">Загрузка...</div> 
+        : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 max-w-6xl mx-auto">{filteredPosts.map(post => <PredictionCard key={post.id} post={post} />)}</div>}
     </div>
   )
 }
@@ -170,11 +108,7 @@ function PrognozPage() {
 
   useEffect(() => {
     async function fetchPost() {
-      const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('slug', slug)
-        .single()
+      const { data } = await supabase.from('posts').select('*').eq('slug', slug).single()
       if (data) setPost(data)
       setLoading(false)
     }
@@ -182,10 +116,7 @@ function PrognozPage() {
   }, [slug])
 
   if (loading) return <div className="text-center py-40">Загрузка...</div>
-  if (!post)
-    return (
-      <div className="text-center py-40 text-red-500">Прогноз не найден</div>
-    )
+  if (!post) return <div className="text-center py-40 text-red-500">Прогноз не найден</div>
 
   return (
     <div className="min-h-screen bg-[#0b0b0f] text-white pt-24 pb-24 px-6">
@@ -197,10 +128,7 @@ function PrognozPage() {
         <div className="text-sm text-gray-500 mb-4">Главная → {post.title}</div>
         <h1 className="text-4xl font-black mb-6">{post.title}</h1>
         <div className="text-gray-400 mb-8">{formatDate(post.created_at)}</div>
-        <div
-          className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
       </div>
     </div>
   )
@@ -213,7 +141,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/prognoz/:slug" element={<PrognozPage />} />
-        <Route path="*" element={<Home />} /> {/* перехват всех остальных URL */}
+        <Route path="*" element={<Home />} />
       </Routes>
     </HelmetProvider>
   )

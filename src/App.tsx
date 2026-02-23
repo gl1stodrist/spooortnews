@@ -12,6 +12,7 @@ const DEFAULT_LOGO =
   'https://via.placeholder.com/120?text=Team'
 
 // ==================== STICKY CTA ====================
+
 function StickyCTA() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-gradient-to-t from-black via-black/95 to-transparent py-4 px-4 border-t border-red-600/30">
@@ -28,10 +29,12 @@ function StickyCTA() {
 }
 
 // ==================== ГЛАВНАЯ ====================
+
 function Home() {
   const [posts, setPosts] = useState<any[]>([])
   const [filteredPosts, setFilteredPosts] = useState<any[]>([])
   const [selectedSport, setSelectedSport] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -41,7 +44,7 @@ function Home() {
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
-        .limit(30)
+        .limit(50)
 
       if (error) console.error(error)
       else {
@@ -58,16 +61,37 @@ function Home() {
   useEffect(() => {
     let result = posts
 
+    // фильтр по спорту
     if (selectedSport !== 'all') {
       result = result.filter(post => post.sport === selectedSport)
     }
 
+    // фильтр по поиску
+    if (searchTerm.trim() !== '') {
+      result = result.filter(post =>
+        post.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
     setFilteredPosts(result)
-  }, [selectedSport, posts])
+  }, [selectedSport, searchTerm, posts])
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pt-24 pb-20">
-      <div className="flex justify-center gap-3 pt-6 pb-8 overflow-x-auto px-4">
+      
+      {/* ПОИСК */}
+      <div className="max-w-xl mx-auto px-4 mb-6">
+        <input
+          type="text"
+          placeholder="🔍 Поиск по матчам..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="w-full bg-[#1a1a1a] border border-gray-800 rounded-2xl px-5 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-red-600 transition-all"
+        />
+      </div>
+
+      {/* ФИЛЬТРЫ */}
+      <div className="flex justify-center gap-3 pb-8 overflow-x-auto px-4">
         {[
           { value: 'all', label: 'Все' },
           { value: 'soccer', label: '⚽ Футбол' },
@@ -99,7 +123,7 @@ function Home() {
         </div>
       ) : filteredPosts.length === 0 ? (
         <div className="text-center py-32 text-xl text-gray-500">
-          Пока нет прогнозов
+          Ничего не найдено
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-6 max-w-7xl mx-auto">
@@ -149,6 +173,7 @@ function Home() {
 }
 
 // ==================== ДЕТАЛЬНАЯ ====================
+
 function PrognozPage() {
   const { id } = useParams()
   const [post, setPost] = useState<any>(null)
@@ -207,6 +232,7 @@ function PrognozPage() {
 }
 
 // ==================== APP ====================
+
 function App() {
   return (
     <Routes>

@@ -3,7 +3,7 @@ import { supabase } from './lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { Link, Routes, Route, useParams } from 'react-router-dom'
-import { Helmet } from 'react-helmet'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 
 const WINLINE_LINK =
   import.meta.env.VITE_WINLINE_LINK ||
@@ -291,10 +291,12 @@ function PrognozPage() {
 // ==================== APP ====================
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/prognoz/:slug" element={<PrognozPage />} />
-    </Routes>
+    <HelmetProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/prognoz/:slug" element={<PrognozPage />} />
+      </Routes>
+    </HelmetProvider>
   )
 }
 

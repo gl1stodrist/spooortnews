@@ -18,7 +18,7 @@ interface Post {
 }
 
 const SUPABASE_URL = 'https://yamtqvmekavsaquossah.supabase.co/rest/v1/posts';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhbXRxdm1la2F2c2FxdW9zc2FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Nzc5NTIsImV4cCI6MjA4NjE1Mzk1Mn0.8Tl64Uo5iBOTdAnJzf3RSUZRnc8D1NHnc8QDYdKTP14'; // ←←← ВСТАВЬ СВОЙ ANON PUBLIC КЛЮЧ
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhbXRxdm1la2F2c2FxdW9zc2FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Nzc5NTIsImV4cCI6MjA4NjE1Mzk1Mn0.8Tl64Uo5iBOTdAnJzf3RSUZRnc8D1NHnc8QDYdKTP14'; // ←←← ВСТАВЬ СВОЙ ANON PUBLIC КЛЮЧ ЗДЕСЬ!!!
 
 const DEFAULT_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIHJ4PSIzMCIgZmlsbD0iIzExMTgyNyIvPgogIDxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjQyIiBmaWxsPSIjMUYyOTM3IiBzdHJva2U9IiM0QjU1NjMiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8dGV4dCB4PSI2MCIgeT0iNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0OCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VEVBTTwvdGV4dD4KPC9zdmc+';
 
@@ -66,7 +66,6 @@ function Footer() {
   return <footer className="bg-black py-12 border-t border-zinc-900 text-center text-zinc-500 text-sm">© 2026 spooort.ru</footer>;
 }
 
-// ==================== ГЛАВНАЯ ====================
 function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
@@ -108,33 +107,21 @@ function Home() {
         <h1 className="text-7xl font-black tracking-tighter">СВЕЖИЕ ПРОГНОЗЫ</h1>
       </header>
 
-      {/* Поиск + фильтры */}
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-4 justify-center mb-12">
         <div className="relative w-full max-w-md">
-          <input
-            type="text"
-            placeholder="Поиск матча..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 rounded-3xl py-4 pl-14 pr-6 text-lg"
-          />
+          <input type="text" placeholder="Поиск матча..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 rounded-3xl py-4 pl-14 pr-6 text-lg" />
           <div className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-400">🔍</div>
         </div>
 
         {['all', 'football', 'esports', 'hockey', 'basketball', 'tennis'].map(f => (
-          <button
-            key={f}
-            onClick={() => setActiveFilter(f)}
-            className={`px-8 py-3 rounded-3xl text-sm font-medium flex items-center gap-2 transition ${
-              activeFilter === f ? 'bg-red-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700'
-            }`}
-          >
+          <button key={f} onClick={() => setActiveFilter(f)}
+            className={`px-8 py-3 rounded-3xl text-sm font-medium transition ${activeFilter === f ? 'bg-red-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700'}`}>
             {f === 'all' ? 'Все' : sportEmojis[f]} {f === 'all' ? '' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
 
-      {/* Лучшие прогнозы недели */}
       <section className="max-w-7xl mx-auto px-6 mb-20">
         <h2 className="text-4xl font-bold text-center mb-10">⭐ ЛУЧШИЕ ПРОГНОЗЫ НЕДЕЛИ</h2>
         <div className="grid md:grid-cols-3 gap-8">
@@ -142,7 +129,6 @@ function Home() {
         </div>
       </section>
 
-      {/* Все прогнозы */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map(p => <PredictionCard key={p.id} post={p} />)}
@@ -162,11 +148,7 @@ function Home() {
             { icon: '🏆', title: 'Все виды спорта', desc: 'Футбол • Хоккей • Баскетбол • Теннис • CS2' },
             { icon: '💰', title: 'Бесплатно', desc: 'Никакой регистрации. Revshare 20%' },
           ].map((c, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -10 }}
-              className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all group"
-            >
+            <motion.div key={i} whileHover={{ y: -10 }} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all group">
               <div className="text-6xl mb-6">{c.icon}</div>
               <h3 className="text-2xl font-semibold mb-4">{c.title}</h3>
               <p className="text-zinc-400">{c.desc}</p>
@@ -178,7 +160,6 @@ function Home() {
   );
 }
 
-// ==================== КАРТОЧКА ====================
 function PredictionCard({ post }: { post: Post }) {
   const [home, away] = post.title.split(' | ')[0].split(' — ');
 
@@ -212,7 +193,6 @@ function PredictionCard({ post }: { post: Post }) {
   );
 }
 
-// ==================== ДЕТАЛЬНЫЙ ПРОГНОЗ ====================
 function PredictionDetail() {
   const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);

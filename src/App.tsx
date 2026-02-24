@@ -18,9 +18,9 @@ interface Post {
 }
 
 const SUPABASE_URL = 'https://yamtqvmekavsaquossah.supabase.co/rest/v1/posts';
-const SUPABASE_ANON_KEY = 'ТВОЙ_КЛЮЧ_ОСТАВЛЯЮ_КАК_ЕСТЬ';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhbXRxdm1la2F2c2FxdW9zc2FoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1Nzc5NTIsImV4cCI6MjA4NjE1Mzk1Mn0.8Tl64Uo5iBOTdAnJzf3RSUZRnc8D1NHnc8QDYdKTP14';
 
-const DEFAULT_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIHJ4PSIzMCIgZmlsbD0iIzExMTgyNyIvPgogIDxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjQyIiBmaWxsPSIjMUYyOTM3IiBzdHJva2U9IiM0QjU1NjMiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8dGV4dCB4PSI2MCIgeT0iNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0OCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VEVBTTwvdGV4dD4KPC9zdmc+';
+const DEFAULT_LOGO = 'data:image/svg+xml;base64,...';
 
 const sportEmojis: Record<string, string> = {
   football: '⚽',
@@ -124,6 +124,7 @@ function Home() {
         </h1>
       </header>
 
+      {/* ПОИСК */}
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-4 justify-center mb-12">
         <div className="relative w-full max-w-md">
           <label htmlFor="search" className="sr-only">
@@ -162,6 +163,7 @@ function Home() {
         ))}
       </div>
 
+      {/* СПИСОК */}
       <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map(p => (
@@ -169,10 +171,39 @@ function Home() {
           ))}
         </div>
       </section>
+
+      {/* О НАС */}
+      <section className="max-w-7xl mx-auto px-6 py-24 border-t border-zinc-800">
+        <div className="text-center mb-16">
+          <div className="inline-block bg-zinc-900 text-red-400 text-sm px-8 py-2 rounded-3xl mb-4 border border-red-500/20">
+            О НАС
+          </div>
+          <h2 className="text-5xl font-black tracking-tighter">
+            spooort.ru — прогнозы от нейросети
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[
+            { icon: '🤖', title: 'Нейросеть', desc: 'Прогнозы генерируются мощной ИИ-моделью' },
+            { icon: '⚡', title: 'Скорость', desc: 'Обновление каждые 4 часа' },
+            { icon: '🏆', title: 'Все виды спорта', desc: 'Футбол • Хоккей • Баскетбол • Теннис • CS2' },
+            { icon: '💰', title: 'Бесплатно', desc: 'Никакой регистрации. Revshare 20%' },
+          ].map((c, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ y: -10 }}
+              className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all"
+            >
+              <div className="text-6xl mb-6">{c.icon}</div>
+              <h3 className="text-2xl font-semibold mb-4">{c.title}</h3>
+              <p className="text-zinc-400">{c.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </>
   );
 }
-
-/* PredictionCard и PredictionDetail оставлены без изменений */
 
 export default App;

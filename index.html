@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>spooort.ru — Прогнозы от нейросети</title>
 
-    <!-- CSP — разрешает всё нужное (Google Fonts + eval для Framer Motion) -->
+    <!-- CSP — полностью разрешает Supabase, Google Fonts и Framer Motion -->
     <meta http-equiv="Content-Security-Policy" 
-          content="default-src 'self'; 
-                   script-src 'self' 'unsafe-eval' 'unsafe-inline'; 
-                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-                   font-src 'self' https://fonts.gstatic.com; 
+          content="default-src 'self';
+                   script-src 'self' 'unsafe-eval' 'unsafe-inline';
+                   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                   font-src 'self' https://fonts.gstatic.com;
+                   connect-src 'self' https://yamtqvmekavsaquossah.supabase.co https://*.supabase.co;
                    img-src 'self' data: https:;">
   </head>
   <body>

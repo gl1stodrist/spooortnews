@@ -14,7 +14,6 @@ interface Post {
   sport?: string;
   bet?: string;
   odds?: number;
-  slug: string;
   created_at: string;
 }
 
@@ -23,13 +22,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const DEFAULT_LOGO = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIHJ4PSIzMCIgZmlsbD0iIzExMTgyNyIvPgogIDxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjQyIiBmaWxsPSIjMUYyOTM3IiBzdHJva2U9IiM0QjU1NjMiIHN0cm9rZS13aWR0aD0iMTIiLz4KICA8dGV4dCB4PSI2MCIgeT0iNzgiIGZvbnQtZmFtaWx5PSJBcmlhbCBCbGFjaywgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI0OCIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+VEVBTTwvdGV4dD4KPC9zdmc+';
 
+const sportEmojis: Record<string, string> = {
+  football: '⚽',
+  esports: '🎮',
+  hockey: '🏒',
+  basketball: '🏀',
+  tennis: '🎾',
+};
+
 function App() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans">
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/prognoz/:slug" element={<PredictionDetail />} />
+        <Route path="/prognoz/:id" element={<PredictionDetail />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
@@ -63,14 +70,13 @@ function Footer() {
   );
 }
 
-// ==================== ГЛАВНАЯ ====================
+// ==================== ГЛАВНАЯ СТРАНИЦА ====================
 function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchPosts();
@@ -80,22 +86,11 @@ function Home() {
     try {
       const res = await fetch(
         `${SUPABASE_URL}?select=*&status=eq.published&order=created_at.desc&limit=50`,
-        {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-        }
+        { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
       );
-
-      if (!res.ok) throw new Error(`HTTP ${res.status} — проверь anon ключ и RLS`);
-
-      const data: Post[] = await res.json();
-      console.log('✅ Загружено из Supabase:', data.length, 'постов');
+      const data = await res.json();
       setPosts(data.length ? data : staticFallback);
-    } catch (err: any) {
-      console.error('❌ Supabase ошибка:', err.message);
-      setError(err.message);
+    } catch {
       setPosts(staticFallback);
     } finally {
       setLoading(false);
@@ -104,17 +99,10 @@ function Home() {
 
   useEffect(() => {
     let result = [...posts];
-    if (searchTerm) {
-      const q = searchTerm.toLowerCase();
-      result = result.filter(p => p.title.toLowerCase().includes(q));
-    }
-    if (activeFilter !== 'all') {
-      result = result.filter(p => p.sport === activeFilter);
-    }
+    if (searchTerm) result = result.filter(p => p.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (activeFilter !== 'all') result = result.filter(p => p.sport === activeFilter);
     setFilteredPosts(result);
   }, [posts, searchTerm, activeFilter]);
-
-  const top3 = posts.slice(0, 3);
 
   if (loading) {
     return <div className="min-h-[80vh] flex items-center justify-center text-3xl text-red-500">Загрузка прогнозов...</div>;
@@ -128,10 +116,10 @@ function Home() {
       </Helmet>
 
       <header className="max-w-7xl mx-auto px-6 pt-16 pb-12 text-center">
-        <h1 className="text-7xl font-black tracking-tighter mb-4">СВЕЖИЕ ПРОГНОЗЫ</h1>
+        <h1 className="text-7xl font-black tracking-tighter">СВЕЖИЕ ПРОГНОЗЫ</h1>
       </header>
 
-      {/* Поиск + фильтры — точно как на скрине */}
+      {/* Поиск + фильтры */}
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-4 justify-center mb-12">
         <div className="relative w-full max-w-md">
           <input
@@ -152,43 +140,69 @@ function Home() {
               activeFilter === f ? 'bg-red-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700'
             }`}
           >
-            {f === 'all' ? 'Все' : sportEmojis[f as keyof typeof sportEmojis]} {f === 'all' ? '' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f === 'all' ? 'Все' : sportEmojis[f]} {f === 'all' ? '' : f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
-
-      {error && <div className="text-red-500 text-center mb-8">Ошибка Supabase: {error}</div>}
 
       {/* Лучшие прогнозы недели */}
       <section className="max-w-7xl mx-auto px-6 mb-20">
         <h2 className="text-4xl font-bold text-center mb-10">⭐ ЛУЧШИЕ ПРОГНОЗЫ НЕДЕЛИ</h2>
         <div className="grid md:grid-cols-3 gap-8">
-          {top3.map((p, i) => (
-            <motion.div key={p.id} whileHover={{ scale: 1.04 }} transition={{ delay: i * 0.05 }}>
-              <PredictionCard post={p} />
-            </motion.div>
-          ))}
+          {posts.slice(0, 3).map(p => <PredictionCard key={p.id} post={p} />)}
         </div>
       </section>
 
       {/* Все прогнозы */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
+      <section className="max-w-7xl mx-auto px-6 pb-20">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredPosts.map(p => <PredictionCard key={p.id} post={p} />)}
+        </div>
+      </section>
+
+      {/* ==================== РАЗДЕЛ О НАС ==================== */}
+      <section className="max-w-7xl mx-auto px-6 py-24 border-t border-zinc-800 bg-zinc-950">
+        <div className="text-center mb-16">
+          <div className="inline-block bg-zinc-900 text-red-400 text-sm px-8 py-2 rounded-3xl mb-4 border border-red-500/20">О НАС</div>
+          <h2 className="text-5xl font-black tracking-tighter">spooort.ru — прогнозы от нейросети</h2>
+          <p className="max-w-2xl mx-auto mt-6 text-zinc-400 text-lg">
+            Современный спортивный портал с прогнозами от нейросети.<br />
+            Мы анализируем футбольные, хоккейные, баскетбольные и киберспортивные матчи,<br />
+            чтобы дать пользователям актуальные и точные прогнозы. Всё просто, удобно и доступно каждому.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { icon: '🤖', title: 'Нейросеть', desc: 'Прогнозы генерируются мощной ИИ-моделью, которая анализирует тысячи статистических показателей в реальном времени.' },
+            { icon: '⚡', title: 'Скорость', desc: 'Обновление каждые 4 часа. Только самые актуальные матчи с реальными коэффициентами.' },
+            { icon: '🏆', title: 'Все виды спорта', desc: 'Футбол, хоккей, баскетбол, теннис, CS2 и другие дисциплины — всё в одном месте.' },
+            { icon: '💰', title: 'Бесплатно и удобно', desc: 'Никакой регистрации. Просто, красиво, доступно каждому. Revshare 20% для партнёров.' },
+          ].map((card, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ y: -10 }}
+              className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all group"
+            >
+              <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-5xl mb-8 group-hover:scale-110 transition-transform">
+                {card.icon}
+              </div>
+              <h3 className="text-2xl font-semibold mb-4 tracking-tight">{card.title}</h3>
+              <p className="text-zinc-400 leading-relaxed">{card.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
     </>
   );
 }
 
-const sportEmojis: Record<string, string> = { football: '⚽', esports: '🎮', hockey: '🏒', basketball: '🏀', tennis: '🎾' };
-
-// ==================== КАРТОЧКА — ТОЧНО КАК НА ТВОЁМ СКРИНЕ ====================
+// ==================== КАРТОЧКА МАТЧА ====================
 function PredictionCard({ post }: { post: Post }) {
   const [home, away] = post.title.split(' | ')[0].split(' — ');
 
   return (
-    <Link to={`/prognoz/${post.slug || 'no-slug'}`}>
+    <Link to={`/prognoz/${post.id}`}>
       <motion.div
         whileHover={{ y: -12 }}
         className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-500/70 transition-all cursor-pointer"
@@ -217,7 +231,7 @@ function PredictionCard({ post }: { post: Post }) {
 
         <div className="p-7 bg-zinc-950">
           <div className="uppercase text-red-500 text-xs tracking-[2px]">НАШ ПРОГНОЗ</div>
-          <div className="text-4xl font-bold mt-3 leading-none">{post.bet}</div>
+          <div className="text-4xl font-bold mt-3">{post.bet}</div>
           {post.odds && <div className="text-emerald-400 text-3xl font-semibold mt-2">@{post.odds}</div>}
         </div>
 
@@ -232,17 +246,17 @@ function PredictionCard({ post }: { post: Post }) {
 
 // ==================== СТРАНИЦА ДЕТАЛЬНОГО ПРОГНОЗА ====================
 function PredictionDetail() {
-  const { slug } = useParams<{ slug: string }>();
+  const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
 
   useEffect(() => {
-    if (!slug) return;
-    fetch(`${SUPABASE_URL}?select=*&slug=eq.${slug}&limit=1`, {
+    if (!id) return;
+    fetch(`${SUPABASE_URL}?select=*&id=eq.${id}&limit=1`, {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
     })
       .then(r => r.json())
       .then(data => setPost(data[0] || null));
-  }, [slug]);
+  }, [id]);
 
   if (!post) return <Navigate to="/" replace />;
 
@@ -276,15 +290,34 @@ function PredictionDetail() {
         {post.odds && <div className="text-emerald-400 text-5xl font-semibold">@{post.odds}</div>}
       </div>
 
-      <article className="prose prose-invert max-w-none text-lg" dangerouslySetInnerHTML={{ __html: post.content }} />
+      <article
+        className="prose prose-invert max-w-none text-lg leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: post.content }}
+      />
 
       <div className="mt-20 text-center">
-        <Link to="/" className="inline-block bg-zinc-800 hover:bg-zinc-700 px-12 py-6 rounded-3xl text-xl font-medium">← Все прогнозы</Link>
+        <Link to="/" className="inline-block bg-zinc-800 hover:bg-zinc-700 px-12 py-6 rounded-3xl text-xl font-medium transition">
+          ← Все прогнозы
+        </Link>
       </div>
     </div>
   );
 }
 
-const staticFallback: Post[] = [ /* твой старый fallback */ ];
+// ==================== ФОЛБЭК ====================
+const staticFallback: Post[] = [
+  {
+    id: 999,
+    title: 'Atleti — Club Brugge | Обе забьют @ 1.85',
+    content: '<p>Тестовый прогноз...</p>',
+    image_url: '',
+    team_logo1: '',
+    team_logo2: '',
+    sport: 'football',
+    bet: 'Обе забьют',
+    odds: 1.85,
+    created_at: '2026-02-24T00:00:00Z',
+  },
+];
 
 export default App;

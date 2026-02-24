@@ -1,31 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
   <head>
-    <head>
-  ...
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
-</head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <title>PRO-SPORTS — Главные спортивные инсайды</title>
-    
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>spooort.ru — Прогнозы от нейросети</title>
 
-    <meta name="description" content="PRO-SPORTS: Оперативное освещение спортивных новостей. Футбол, хоккей, ММА и прогнозы на спорт." />
-    <meta name="author" content="PRO-SPORTS" />
-
-    <meta property="og:title" content="PRO-SPORTS — Главные спортивные инсайды" />
-    <meta property="og:description" content="Все главные новости спорта в одной ленте." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://spooort.ru/" />
-    <meta property="og:image" content="https://spooort.ru/favicon.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://spooort.ru/favicon.png" />
+    <!-- Content Security Policy — исправляет ошибку с 'eval' -->
+    <meta http-equiv="Content-Security-Policy" 
+          content="script-src 'self' 'unsafe-eval' 'unsafe-inline'; 
+                   style-src 'self' 'unsafe-inline'; 
+                   img-src 'self' data: https:;">
   </head>
-
-  <body style="background-color: #0d0f12;">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

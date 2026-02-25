@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useParams, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 
 interface Post {
@@ -142,11 +141,11 @@ function Home() {
             { icon: '🏆', title: 'Все виды спорта', desc: 'Футбол • Хоккей • Баскетбол • Теннис • CS2' },
             { icon: '💰', title: 'Бесплатно', desc: 'Никакой регистрации. Revshare 20%' },
           ].map((c, i) => (
-            <motion.div key={i} whileHover={{ y: -10 }} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all group">
+            <div key={i} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 hover:border-red-500/40 transition-all hover:-translate-y-2">
               <div className="text-6xl mb-6">{c.icon}</div>
               <h3 className="text-2xl font-semibold mb-4">{c.title}</h3>
               <p className="text-zinc-400">{c.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </section>
@@ -159,7 +158,7 @@ function PredictionCard({ post }: { post: Post }) {
 
   return (
     <Link to={`/prognoz/${post.id}`}>
-      <motion.div whileHover={{ y: -12 }} className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-500/70 transition-all cursor-pointer">
+      <div className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-500/70 transition-all hover:-translate-y-2 cursor-pointer">
         <div className="px-7 pt-7 pb-4 flex items-center justify-between border-b border-zinc-800">
           <div className="flex items-center gap-4">
             {post.team_logo1 ? <img src={post.team_logo1} alt={home} className="w-9 h-9 rounded-full object-contain" /> : <div className="w-9 h-9 bg-red-600 rounded-full" />}
@@ -182,7 +181,7 @@ function PredictionCard({ post }: { post: Post }) {
           <div>{new Date(post.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.</div>
           <div className="font-mono">актуально</div>
         </div>
-      </motion.div>
+      </div>
     </Link>
   );
 }

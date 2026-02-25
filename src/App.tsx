@@ -103,8 +103,15 @@ function Home() {
 
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-4 justify-center mb-12">
         <div className="relative w-full max-w-md">
-          <input type="text" placeholder="Поиск матча..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 rounded-3xl py-4 pl-14 pr-6 text-lg" />
+          <input 
+            id="search-input"
+            name="search"
+            type="text" 
+            placeholder="Поиск матча..." 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)}
+            className="w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 rounded-3xl py-4 pl-14 pr-6 text-lg" 
+          />
           <div className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-400">🔍</div>
         </div>
 

@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useParams, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';

@@ -25,7 +25,7 @@ const sportEmojis: Record<string, string> = {
   esports: '🎮',
   hockey: '🏒',
   basketball: '🏀',
-  tennis: '🎾',
+  tennis: '🎾'
 };
 
 function App() {

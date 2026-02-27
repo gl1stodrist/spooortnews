@@ -80,6 +80,9 @@ function Home() {
       const res = await fetch(`${SUPABASE_URL}?select=*&status=eq.published&order=created_at.desc&limit=50`, {
         headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
       });
+      if (!res.ok) {
+        throw new Error('Failed to fetch posts');
+      }
       const data = await res.json();
       setPosts(data.length ? data : []);
     } catch (e) {
@@ -163,91 +166,6 @@ function Home() {
         </div>
       </section>
     </>
-  );
-}
-
-function PredictionCard({ post }: { post: Post }) {
-  const [home, away] = post.title.split(' | ')[0].split(' — ');
-
-  return (
-    <Link to={`/prognoz/${post.id}`}>
-      <div className="bg-zinc-900 rounded-3xl overflow-hidden border border-zinc-800 hover:border-red-500/70 transition-all hover:-translate-y-3 cursor-pointer">
-        <div className="px-7 pt-7 pb-4 flex items-center justify-between border-b border-zinc-800">
-          <div className="flex items-center gap-4">
-            {post.team_logo1 ? <img src={post.team_logo1} alt={home} className="w-9 h-9 rounded-full object-contain" /> : <div className="w-9 h-9 bg-red-600 rounded-full" />}
-            <div className="font-bold text-xl tracking-tight">{home}</div>
-          </div>
-          <div className="text-red-600 font-black text-5xl">VS</div>
-          <div className="flex items-center gap-4 flex-row-reverse">
-            <div className="font-bold text-xl tracking-tight text-right">{away}</div>
-            {post.team_logo2 ? <img src={post.team_logo2} alt={away} className="w-9 h-9 rounded-full object-contain" /> : <div className="w-9 h-9 bg-blue-600 rounded-full" />}
-          </div>
-        </div>
-
-        <div className="p-7 bg-zinc-950">
-          <div className="uppercase text-red-500 text-xs tracking-[2px]">НАШ ПРОГНОЗ</div>
-          <div className="text-4xl font-bold mt-3">{post.bet}</div>
-          {post.odds && <div className="text-emerald-400 text-3xl font-semibold mt-2">@{post.odds}</div>}
-        </div>
-
-        <div className="px-7 py-5 text-sm text-zinc-400 flex justify-between border-t border-zinc-800">
-          <div>{new Date(post.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })} г.</div>
-          <div className="font-mono">актуально</div>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function PredictionDetail() {
-  const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<Post | null>(null);
-
-  useEffect(() => {
-    if (!id) return;
-    fetch(`${SUPABASE_URL}?select=*&id=eq.${id}&limit=1`, {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
-    })
-      .then(r => r.json())
-      .then(data => setPost(data[0] || null));
-  }, [id]);
-
-  if (!post) return <Navigate to="/" replace />;
-
-  const [home, away] = post.title.split(' | ')[0].split(' — ');
-
-  return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
-      <Helmet><title>{post.title} | spooort.ru</title></Helmet>
-
-      <div className="flex items-center gap-3 text-sm text-zinc-500 mb-10">
-        <Link to="/" className="hover:text-white">Главная</Link> › Прогноз
-      </div>
-
-      <div className="flex flex-col md:flex-row items-center justify-between gap-10 mb-16">
-        <div className="flex items-center gap-6">
-          <img src={post.team_logo1 || DEFAULT_LOGO} alt={home} className="w-24 h-24 rounded-3xl" />
-          <div className="text-5xl font-bold tracking-tighter">{home}</div>
-        </div>
-        <div className="text-red-600 font-black text-8xl">VS</div>
-        <div className="flex items-center gap-6 flex-row-reverse">
-          <div className="text-5xl font-bold tracking-tighter">{away}</div>
-          <img src={post.team_logo2 || DEFAULT_LOGO} alt={away} className="w-24 h-24 rounded-3xl" />
-        </div>
-      </div>
-
-      <div className="bg-zinc-900 rounded-3xl p-12 text-center mb-16">
-        <div className="uppercase text-red-500 tracking-[3px] text-sm mb-4">НАШ ПРОГНОЗ</div>
-        <div className="text-6xl font-bold mb-6">{post.bet}</div>
-        {post.odds && <div className="text-emerald-400 text-5xl font-semibold">@{post.odds}</div>}
-      </div>
-
-      <article className="prose prose-invert max-w-none text-lg" dangerouslySetInnerHTML={{ __html: post.content }} />
-
-      <div className="mt-20 text-center">
-        <Link to="/" className="inline-block bg-zinc-800 hover:bg-zinc-700 px-12 py-6 rounded-3xl text-xl font-medium">← Все прогнозы</Link>
-      </div>
-    </div>
   );
 }
 

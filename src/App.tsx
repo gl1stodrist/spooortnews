@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import PredictionDetail from './components/PredictionDetail';
 import PredictionCard from './components/PredictionCard';
+import PredictionDetail from './components/PredictionDetail';
 import NotFound from './components/NotFound';
 
 interface Post {
